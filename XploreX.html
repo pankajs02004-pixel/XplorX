@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XplorX — Explore Every World</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#000;--white:#fff;--off-white:#FAFAF8;--light:#F4F4F2;
+  --g1:rgba(255,255,255,0.06);--g2:rgba(255,255,255,0.12);--g3:rgba(255,255,255,0.25);--g4:rgba(255,255,255,0.55);
+  --saffron:#FF6B00;--saffronL:#FF8C35;--saffronD:#CC5500;
+  --accent:#4ade80
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:'DM Sans',sans-serif;overflow-x:hidden;cursor:none}
+
+/* CURSOR */
+#cursor{width:10px;height:10px;background:var(--saffron);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.15s}
+#cursor-ring{width:34px;height:34px;border:1px solid rgba(255,107,0,0.4);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%)}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:#000;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;transition:opacity 0.9s,visibility 0.9s}
+#loading.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.ll{font-family:'Bebas Neue',sans-serif;font-size:68px;letter-spacing:0.12em;color:rgba(255,255,255,0.9)}
+.lb{width:160px;height:0.5px;background:rgba(255,255,255,0.1)}
+.lf{height:100%;background:var(--saffron);width:0;transition:width 0.04s linear}
+.lp{font-size:10px;letter-spacing:0.2em;color:rgba(255,255,255,0.3);text-transform:uppercase}
+
+/* NAV — BLACK */
+#nav{position:fixed;top:0;left:0;right:0;padding:22px 48px;display:flex;align-items:center;justify-content:space-between;z-index:100;background:transparent;transition:background 0.4s}
+#nav.sc{background:rgba(0,0,0,0.92);backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(255,255,255,0.06)}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.14em;color:var(--white);text-decoration:none}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{font-size:11px;letter-spacing:0.13em;text-transform:uppercase;color:var(--g4);text-decoration:none;transition:color 0.3s}
+.nav-links a:hover{color:var(--saffron)}
+.nav-right{display:flex;gap:10px}
+.nb{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;border:0.5px solid var(--g2);padding:9px 20px;border-radius:24px;background:transparent;color:var(--g4);cursor:none;transition:all 0.3s;font-family:'DM Sans',sans-serif}
+.nb:hover{border-color:var(--white);color:var(--white)}
+.nb.fill{background:var(--saffron);color:var(--white);border-color:var(--saffron)}
+.nb.fill:hover{background:var(--saffronL)}
+
+/* HERO — BLACK */
+#hero{position:relative;height:100vh;overflow:hidden;display:flex;align-items:center;background:#000}
+.scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end;padding-right:8%}
+.stage{width:420px;height:420px;perspective:900px;flex-shrink:0}
+.cube-wrap{width:100%;height:100%;transform-style:preserve-3d;animation:spin3d 18s linear infinite}
+@keyframes spin3d{0%{transform:rotateX(15deg) rotateY(0deg) rotateZ(5deg)}100%{transform:rotateX(15deg) rotateY(360deg) rotateZ(5deg)}}
+.panel{position:absolute;top:50%;left:50%;transform-origin:center center}
+.p1{width:200px;height:180px;background:rgba(30,30,40,0.92);border:0.5px solid rgba(255,255,255,0.08);transform:translate(-50%,-50%) rotateY(0deg) translateZ(100px);clip-path:polygon(50% 0%,100% 100%,0% 100%)}
+.p2{width:200px;height:180px;background:rgba(20,25,50,0.88);border:0.5px solid rgba(255,255,255,0.06);transform:translate(-50%,-50%) rotateY(72deg) translateZ(100px);clip-path:polygon(50% 0%,100% 100%,0% 100%)}
+.p3{width:200px;height:180px;background:rgba(30,15,40,0.9);border:0.5px solid rgba(255,255,255,0.07);transform:translate(-50%,-50%) rotateY(144deg) translateZ(100px);clip-path:polygon(50% 0%,100% 100%,0% 100%)}
+.p4{width:200px;height:180px;background:rgba(10,25,45,0.92);border:0.5px solid rgba(255,255,255,0.05);transform:translate(-50%,-50%) rotateY(216deg) translateZ(100px);clip-path:polygon(50% 0%,100% 100%,0% 100%)}
+.p5{width:200px;height:180px;background:rgba(25,20,35,0.88);border:0.5px solid rgba(255,255,255,0.08);transform:translate(-50%,-50%) rotateY(288deg) translateZ(100px);clip-path:polygon(50% 0%,100% 100%,0% 100%)}
+.p6{width:220px;height:220px;background:rgba(15,15,25,0.95);border:0.5px solid rgba(255,255,255,0.04);transform:translate(-50%,-50%) rotateX(90deg) translateZ(80px);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%)}
+.p7{width:220px;height:220px;background:rgba(10,10,20,0.95);border:0.5px solid rgba(255,255,255,0.04);transform:translate(-50%,-50%) rotateX(-90deg) translateZ(80px);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%)}
+.ring{position:absolute;top:50%;left:50%;border-radius:50%;border:0.5px solid rgba(255,255,255,0.1);transform-style:preserve-3d}
+.r1{width:320px;height:320px;transform:translate(-50%,-50%) rotateX(70deg);animation:rspin1 14s linear infinite}
+.r2{width:400px;height:400px;transform:translate(-50%,-50%) rotateX(55deg) rotateY(30deg);border-color:rgba(255,107,0,0.1);animation:rspin2 20s linear infinite}
+.r3{width:500px;height:500px;transform:translate(-50%,-50%) rotateX(40deg) rotateY(-20deg);border-color:rgba(255,107,0,0.06);animation:rspin1 28s linear infinite reverse}
+@keyframes rspin1{from{transform:translate(-50%,-50%) rotateX(70deg) rotateZ(0deg)}to{transform:translate(-50%,-50%) rotateX(70deg) rotateZ(360deg)}}
+@keyframes rspin2{from{transform:translate(-50%,-50%) rotateX(55deg) rotateY(30deg) rotateZ(0deg)}to{transform:translate(-50%,-50%) rotateX(55deg) rotateY(30deg) rotateZ(360deg)}}
+.particles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.dot{position:absolute;border-radius:50%;background:rgba(255,255,255,0.4)}
+.d1{width:2px;height:2px;top:20%;left:15%;animation:float1 8s ease-in-out infinite}
+.d2{width:3px;height:3px;top:60%;left:25%;animation:float1 12s ease-in-out infinite 2s}
+.d3{width:2px;height:2px;top:35%;left:80%;animation:float2 10s ease-in-out infinite 1s}
+.d4{width:2px;height:2px;top:75%;left:70%;animation:float2 9s ease-in-out infinite 3s}
+.d5{width:3px;height:3px;top:15%;left:60%;animation:float1 11s ease-in-out infinite 4s;background:rgba(255,107,0,0.6)}
+.d6{width:2px;height:2px;top:85%;left:40%;animation:float2 13s ease-in-out infinite 0.5s}
+.d7{width:2px;height:2px;top:45%;left:90%;animation:float1 7s ease-in-out infinite 2.5s;background:rgba(255,107,0,0.4)}
+.d8{width:3px;height:3px;top:10%;left:45%;animation:float2 15s ease-in-out infinite 1.5s}
+.d9{width:2px;height:2px;top:90%;left:10%;animation:float1 9s ease-in-out infinite 3.5s}
+.d10{width:2px;height:2px;top:55%;left:55%;animation:float2 11s ease-in-out infinite 5s;background:rgba(255,107,0,0.7)}
+.d11{width:3px;height:3px;top:30%;left:35%;animation:float1 14s ease-in-out infinite 0.8s}
+.d12{width:2px;height:2px;top:70%;left:85%;animation:float2 8s ease-in-out infinite 4.5s}
+@keyframes float1{0%,100%{transform:translateY(0) translateX(0)}33%{transform:translateY(-22px) translateX(10px)}66%{transform:translateY(12px) translateX(-8px)}}
+@keyframes float2{0%,100%{transform:translateY(0) translateX(0)}40%{transform:translateY(18px) translateX(-14px)}70%{transform:translateY(-10px) translateX(10px)}}
+.glow{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.g-o1{width:400px;height:400px;background:rgba(255,107,0,0.07);top:-10%;right:5%;animation:glowmove 12s ease-in-out infinite}
+.g-o2{width:300px;height:300px;background:rgba(255,107,0,0.04);bottom:10%;right:20%;animation:glowmove 16s ease-in-out infinite reverse}
+@keyframes glowmove{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,20px)}}
+.hero-content{position:relative;z-index:10;padding:0 48px 72px;width:100%;display:flex;justify-content:space-between;align-items:center}
+
+.bdot{width:6px;height:6px;border-radius:50%;background:var(--saffron);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.25}}.hero-badge{display:inline-flex;align-items:center;gap:8px;border:0.5px solid rgba(255,107,0,0.3);padding:6px 14px;border-radius:20px;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,107,0,0.85);margin-bottom:22px;margin-top:140px;background:rgba(255,107,0,0.06)}
+.hero-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(68px,9.5vw,126px);line-height:0.87;letter-spacing:0.02em}
+.solid{color:var(--white);display:block}
+.stroke{color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,0.2);display:block}
+.solid-o{color:var(--saffron);display:block}
+.hero-sub{margin-top:20px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--g3);max-width:310px;line-height:2}
+.hero-cta-row{margin-top:30px;display:flex;gap:14px;align-items:center}
+.btn-primary{font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;background:var(--saffron);color:var(--white);border:none;padding:14px 32px;border-radius:2px;cursor:none;transition:all 0.35s;font-weight:500}
+.btn-primary:hover{background:var(--saffronL);transform:translateY(-2px)}
+.btn-ghost{font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;background:transparent;color:var(--g4);border:0.5px solid var(--g2);padding:14px 28px;border-radius:2px;cursor:none;transition:all 0.35s}
+.btn-ghost:hover{border-color:var(--saffron);color:var(--saffron)}
+.hero-right{text-align:right}
+.hero-scroll{display:flex;align-items:center;gap:12px;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--g3)}
+.sline{width:44px;height:0.5px;background:var(--g3);position:relative;overflow:hidden}
+.sline::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:var(--saffron);animation:sl 2.5s ease infinite}
+@keyframes sl{0%{left:-100%}100%{left:100%}}
+
+/* STATS — BLACK */
+#stats{display:grid;grid-template-columns:repeat(4,1fr);background:#000;border-top:0.5px solid rgba(255,255,255,0.06);border-left:0.5px solid rgba(255,255,255,0.06)}
+.stat{padding:46px;border-right:0.5px solid rgba(255,255,255,0.06);border-bottom:0.5px solid rgba(255,255,255,0.06)}
+.stn{font-family:'Bebas Neue',sans-serif;font-size:58px;letter-spacing:0.04em;line-height:1;color:var(--white)}
+.stn span{color:var(--saffron)}
+.stl{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-top:8px}
+
+/* MARQUEE — BLACK */
+.mq-wrap{padding:26px 0;background:#000;border-top:0.5px solid rgba(255,255,255,0.06);overflow:hidden;white-space:nowrap}
+.mq-track{display:inline-flex;gap:44px;animation:mq 22s linear infinite}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.mq-item{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.14em;color:rgba(255,255,255,0.13);display:inline-flex;align-items:center;gap:18px}
+.mqdot{width:4px;height:4px;border-radius:50%;background:var(--saffron);opacity:0.5}
+
+/* ═══ WHITE SECTION ═══ */
+#explore{background:var(--off-white);padding:80px 48px;border-top:3px solid var(--saffron)}
+.slabel-d{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--saffron);margin-bottom:14px;font-weight:500}
+.stitle-d{font-family:'Bebas Neue',sans-serif;font-size:clamp(46px,5.5vw,78px);letter-spacing:0.04em;line-height:0.9;margin-bottom:50px;color:var(--black)}
+.stitle-d .dim{color:rgba(0,0,0,0.18)}
+
+/* CAT TABS */
+.cat-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:38px}
+.cat-btn{padding:9px 22px;border:1px solid rgba(0,0,0,0.1);border-radius:24px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(0,0,0,0.4);cursor:none;background:var(--white);font-family:'DM Sans',sans-serif;transition:all 0.25s;font-weight:500}
+.cat-btn:hover{border-color:var(--saffron);color:var(--saffron)}
+.cat-btn.active{border-color:var(--saffron);color:var(--white);background:var(--saffron)}
+
+/* CARDS — WHITE */
+.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{position:relative;height:300px;overflow:hidden;border-radius:12px;background:var(--white);border:1px solid rgba(0,0,0,0.08);cursor:none;transition:transform 0.4s cubic-bezier(0.16,1,0.3,1),box-shadow 0.4s,border-color 0.3s;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.card:hover{transform:translateY(-8px);box-shadow:0 20px 48px rgba(0,0,0,0.12);border-color:var(--saffron)}
+.card-scene{width:100%;height:63%;display:flex;align-items:center;justify-content:center;transform-style:preserve-3d;perspective:600px;background:#111;}
+.card-overlay{position:absolute;bottom:0;left:0;right:0;padding:14px 18px;background:var(--white);border-top:1px solid rgba(0,0,0,0.06)}
+.ctag{font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--saffron);margin-bottom:4px;font-weight:500}
+.cname{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.06em;color:var(--black)}
+.cprice{font-size:11px;color:rgba(0,0,0,0.4);margin-top:3px}
+.cbadge{position:absolute;top:12px;right:12px;font-size:10px;font-weight:600;background:var(--saffron);padding:4px 10px;border-radius:12px;color:var(--white)}
+
+/* 3D SHAPES */
+.css3d{width:120px;height:120px;transform-style:preserve-3d;position:relative}
+.css3d.spin-a{animation:cardSpin 12s linear infinite}
+.css3d.spin-b{animation:cardSpin 16s linear infinite reverse}
+.css3d.spin-c{animation:cardSpin 10s linear infinite 2s}
+@keyframes cardSpin{0%{transform:rotateX(20deg) rotateY(0deg)}100%{transform:rotateX(20deg) rotateY(360deg)}}
+.cface{position:absolute;width:100%;height:100%;border:0.5px solid rgba(255,255,255,0.15);transform-style:preserve-3d}
+.cf1{transform:rotateY(0deg) translateZ(60px);background:rgba(255,107,0,0.1)}
+.cf2{transform:rotateY(90deg) translateZ(60px);background:rgba(255,255,255,0.04)}
+.cf3{transform:rotateY(180deg) translateZ(60px);background:rgba(255,107,0,0.08)}
+.cf4{transform:rotateY(270deg) translateZ(60px);background:rgba(255,255,255,0.04)}
+.cf5{transform:rotateX(90deg) translateZ(60px);background:rgba(255,107,0,0.12)}
+.cf6{transform:rotateX(-90deg) translateZ(60px);background:rgba(255,255,255,0.02)}
+.octa{width:110px;height:110px;transform-style:preserve-3d;animation:cardSpin 14s linear infinite}
+.oface{position:absolute;width:0;height:0;border-left:55px solid transparent;border-right:55px solid transparent;top:50%;left:50%;transform-origin:0 0}
+.of1{border-bottom:95px solid rgba(255,107,0,0.28);transform:translate(-50%,-50%) rotateY(0deg) rotateX(30deg) translateZ(30px)}
+.of2{border-bottom:95px solid rgba(255,107,0,0.2);transform:translate(-50%,-50%) rotateY(90deg) rotateX(30deg) translateZ(30px)}
+.of3{border-bottom:95px solid rgba(255,107,0,0.24);transform:translate(-50%,-50%) rotateY(180deg) rotateX(30deg) translateZ(30px)}
+.of4{border-bottom:95px solid rgba(255,107,0,0.16);transform:translate(-50%,-50%) rotateY(270deg) rotateX(30deg) translateZ(30px)}
+.torus-wrap{position:relative;width:120px;height:120px;transform-style:preserve-3d;animation:torusSpin 10s linear infinite}
+@keyframes torusSpin{0%{transform:rotateX(60deg) rotateZ(0deg)}100%{transform:rotateX(60deg) rotateZ(360deg)}}
+.torus-ring{position:absolute;top:50%;left:50%;border-radius:50%;border:18px solid rgba(255,255,255,0.1);transform:translate(-50%,-50%)}
+.tr1{width:110px;height:110px;border-color:rgba(255,107,0,0.35)}
+.tr2{width:80px;height:80px;border-color:rgba(255,255,255,0.08);animation:torusSpin2 6s linear infinite}
+@keyframes torusSpin2{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+.sphere-wrap{position:relative;width:120px;height:120px;transform-style:preserve-3d;animation:cardSpin 15s linear infinite reverse}
+.sph-ring{position:absolute;top:50%;left:50%;border-radius:50%;border:0.5px solid rgba(255,255,255,0.15);transform-style:preserve-3d}
+.sr1{width:100px;height:100px;transform:translate(-50%,-50%) rotateY(0deg)}
+.sr2{width:100px;height:100px;transform:translate(-50%,-50%) rotateY(60deg)}
+.sr3{width:100px;height:100px;transform:translate(-50%,-50%) rotateY(120deg)}
+.sr4{width:70px;height:70px;transform:translate(-50%,-50%) rotateX(90deg);border-color:rgba(255,107,0,0.35)}
+
+/* FEATURED STRIP — WHITE */
+#fstrip-wrap{background:var(--off-white);padding:0 48px 80px}
+#fstrip{display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
+#fstrip::-webkit-scrollbar{display:none}
+.scard{flex:0 0 220px;height:300px;border:1px solid rgba(0,0,0,0.08);border-radius:12px;overflow:hidden;position:relative;cursor:none;transition:flex 0.5s cubic-bezier(0.16,1,0.3,1),border-color 0.3s,box-shadow 0.3s;background:var(--white);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.scard:hover{flex:0 0 290px;border-color:var(--saffron);box-shadow:0 12px 32px rgba(255,107,0,0.1)}
+.scard-inner{width:100%;height:65%;display:flex;align-items:center;justify-content:center;background:#0a0a0a}
+.sinfo{position:absolute;bottom:0;left:0;right:0;padding:14px 16px;background:var(--white);border-top:1px solid rgba(0,0,0,0.06)}
+.stag{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--saffron);margin-bottom:3px;font-weight:500}
+.sname{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.06em;color:var(--black)}
+
+/* AI SECTION — WHITE */
+#ai-section{background:var(--white);padding:80px 48px 96px;border-top:1px solid rgba(0,0,0,0.08)}
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:50px}
+.ai-info p{font-size:15px;line-height:1.85;color:rgba(0,0,0,0.5);margin-bottom:30px}
+.ai-features{display:flex;flex-direction:column;gap:0}
+.ai-feat{padding:18px 0;border-top:1px solid rgba(0,0,0,0.07);display:flex;align-items:flex-start;gap:16px}
+.afn{font-family:'Bebas Neue',sans-serif;font-size:30px;color:rgba(255,107,0,0.18);min-width:34px;line-height:1}
+.aft{font-size:13px;font-weight:500;letter-spacing:0.05em;margin-bottom:4px;color:var(--black)}
+.afd{font-size:12px;color:rgba(0,0,0,0.4);line-height:1.7}
+
+/* AI CHAT — WHITE */
+.ai-chat{border:1px solid rgba(0,0,0,0.1);border-radius:12px;overflow:hidden;background:var(--off-white);display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,0.07)}
+.aich{padding:16px 22px;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;gap:12px;background:var(--white)}
+.aiav{width:36px;height:36px;border-radius:50%;border:2px solid var(--saffron);background:rgba(255,107,0,0.05);display:flex;align-items:center;justify-content:center;position:relative}
+.aiav::after{content:'';width:9px;height:9px;border-radius:50%;background:var(--saffron);position:absolute;animation:breathe 2.4s ease infinite}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:0.9}50%{transform:scale(1.5);opacity:0.3}}
+.ainame{font-size:13px;font-weight:500;letter-spacing:0.07em;color:var(--black)}
+.aisub{font-size:10px;color:rgba(0,0,0,0.35);letter-spacing:0.07em;margin-top:1px}
+.aionl{margin-left:auto;font-size:10px;color:rgba(0,0,0,0.35);letter-spacing:0.1em;text-transform:uppercase}
+.aionl span{color:var(--saffron);font-weight:600}
+.chat-msgs{padding:18px 22px;display:flex;flex-direction:column;gap:12px;min-height:220px;max-height:280px;overflow-y:auto;scrollbar-width:none;background:var(--off-white)}
+.chat-msgs::-webkit-scrollbar{display:none}
+.cm{max-width:80%}
+.cm.ai{align-self:flex-start}
+.cm.user{align-self:flex-end}
+.cmb{padding:11px 15px;border-radius:10px;font-size:13px;line-height:1.65}
+.cm.ai .cmb{background:var(--white);border:1px solid rgba(0,0,0,0.08);color:rgba(0,0,0,0.75);border-radius:2px 10px 10px 10px}
+.cm.user .cmb{background:var(--saffron);color:var(--white);border-radius:10px 2px 10px 10px}
+.cmt{font-size:9px;color:rgba(0,0,0,0.22);margin-top:4px;letter-spacing:0.07em}
+.tind{display:none;align-items:center;gap:5px;padding:11px 15px;background:var(--white);border:1px solid rgba(0,0,0,0.08);border-radius:2px 10px 10px 10px;width:fit-content}
+.tind.show{display:flex}
+.tind span{width:5px;height:5px;border-radius:50%;background:rgba(0,0,0,0.2);animation:tdot 1.2s infinite}
+.tind span:nth-child(2){animation-delay:0.2s}
+.tind span:nth-child(3){animation-delay:0.4s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+.chat-sugs{padding:8px 22px 10px;display:flex;flex-wrap:wrap;gap:6px;background:var(--white);border-top:1px solid rgba(0,0,0,0.06)}
+.sug{padding:5px 13px;border:1px solid rgba(0,0,0,0.1);border-radius:14px;font-size:10px;letter-spacing:0.06em;color:rgba(0,0,0,0.45);cursor:none;transition:all 0.2s;font-family:'DM Sans',sans-serif;background:transparent}
+.sug:hover{border-color:var(--saffron);color:var(--saffron);background:rgba(255,107,0,0.04)}
+.chat-irow{padding:12px 16px;border-top:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;gap:10px;background:var(--white)}
+.cinp{flex:1;background:var(--off-white);border:1px solid rgba(0,0,0,0.1);border-radius:22px;padding:10px 18px;font-size:13px;color:var(--black);outline:none;font-family:'DM Sans',sans-serif;transition:border-color 0.2s}
+.cinp::placeholder{color:rgba(0,0,0,0.28)}
+.cinp:focus{border-color:var(--saffron)}
+.bmic,.bsend{width:38px;height:38px;border-radius:50%;border:none;cursor:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.3s}
+.bmic{background:transparent;border:1px solid rgba(0,0,0,0.1)}
+.bmic:hover{background:rgba(255,107,0,0.08);border-color:var(--saffron)}
+.bsend{background:var(--saffron)}
+.bsend:hover{background:var(--saffronL);transform:scale(1.06)}
+.bmic svg{width:15px;height:15px;stroke:rgba(0,0,0,0.45);fill:none}
+.bsend svg{width:15px;height:15px;stroke:var(--white);fill:none}
+
+/* NEWSLETTER — BLACK */
+#newsletter{background:#000;padding:70px 48px;border-top:0.5px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;gap:56px}
+.nl-l h3{font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:0.06em;line-height:0.92;margin-bottom:14px;color:var(--white)}
+.nl-l p{font-size:13px;color:rgba(255,255,255,0.3);line-height:1.8}
+.nl-row{display:flex;border:0.5px solid rgba(255,255,255,0.12);border-radius:2px;overflow:hidden}
+.nlinp{flex:1;background:rgba(255,255,255,0.04);border:none;padding:14px 20px;font-size:13px;color:var(--white);font-family:'DM Sans',sans-serif;outline:none}
+.nlinp::placeholder{color:rgba(255,255,255,0.18)}
+.nlsub{font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;background:var(--saffron);color:var(--white);border:none;padding:14px 22px;cursor:none;font-weight:500;white-space:nowrap;transition:background 0.3s}
+.nlsub:hover{background:var(--saffronL)}
+.nlnote{font-size:10px;color:rgba(255,255,255,0.18);margin-top:10px}
+
+/* FOOTER — BLACK */
+#footer{background:#000;padding:60px 48px 40px;border-top:0.5px solid rgba(255,255,255,0.06);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:38px}
+.flogo{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:0.1em;color:rgba(255,255,255,0.07)}
+.fcol-t{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:18px}
+.flinks{display:flex;flex-direction:column;gap:11px}
+.flinks a{font-size:13px;color:rgba(255,255,255,0.32);text-decoration:none;transition:color 0.3s}
+.flinks a:hover{color:var(--saffron)}
+.fbot{background:#000;padding:20px 48px;border-top:0.5px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center}
+.fcopy{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.14)}
+@media(max-width:768px){
+  #nav{padding:16px 20px}
+  .nav-links{display:none}
+  .hero-h1{font-size:52px}
+  #stats{grid-template-columns:repeat(2,1fr)}
+  .cards-grid{grid-template-columns:1fr}
+  .ai-grid{grid-template-columns:1fr}
+  #footer{grid-template-columns:1fr 1fr}
+  #newsletter{flex-direction:column;gap:28px}
+  #explore,#ai-section{padding:50px 20px}
+}
+
+.search-row{margin-bottom:24px}
+#search-inp{
+  width:100%;
+  padding:14px 20px;
+  border:1.5px solid rgba(0,0,0,0.1);
+  border-radius:32px;
+  font-size:14px;
+  font-family:'DM Sans',sans-serif;
+  outline:none;
+  margin-bottom:14px;
+  background:var(--white);
+  color:var(--black);
+  transition:border-color 0.3s;
+}
+#search-inp:focus{border-color:var(--saffron)}
+#search-inp::placeholder{color:rgba(0,0,0,0.3)}
+.area-filters{display:flex;gap:8px;flex-wrap:wrap}
+.area-btn{
+  padding:7px 18px;
+  border:1px solid rgba(0,0,0,0.1);
+  border-radius:20px;
+  font-size:11px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  background:var(--white);
+  color:rgba(0,0,0,0.4);
+  cursor:none;
+  font-family:'DM Sans',sans-serif;
+  transition:all 0.25s;
+}
+.area-btn:hover{border-color:var(--saffron);color:var(--saffron)}
+.area-btn.active{background:var(--saffron);color:var(--white);border-color:var(--saffron)}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const _supabase = supabase.createClient(
+    'https://ttbheiwtysickbyasulr.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0YmhlaXd0eXNpY2tieWFzdWxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDAxMzMsImV4cCI6MjA5NDA3NjEzM30.4qdV5Pyl9EgTzYqJGL_xSRGg9_BSlO01rw_6lCzcLRs'
+  );
+  console.log('Supabase connected!');
+</script>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<div id="loading">
+  <div class="ll">XplorX</div>
+  <div class="lb"><div class="lf" id="lf"></div></div>
+  <div class="lp" id="lp">0%</div>
+</div>
+
+<!-- NAV — BLACK -->
+<nav id="nav">
+  <a href="#" class="nav-logo">XplorX</a>
+  <ul class="nav-links">
+    <li><a href="#explore">Trips</a></li>
+    <li><a href="#explore">Events</a></li>
+    <li><a href="#explore">Sports</a></li>
+    <li><a href="#explore">Dine</a></li>
+    <li><a href="#ai-section">AI Agent</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="nb">Sign in</button>
+    <button class="nb fill">Get Started</button>
+  </div>
+</nav>
+
+<!-- HERO — BLACK + 3D -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-left">
+      <div class="hero-badge"><div class="bdot"></div>AI-Powered Booking Platform</div>
+      <h1 class="hero-h1">
+        <span class="solid">Explore</span>
+        <span class="stroke">Every</span>
+        <span class="solid-o">World</span>
+      </h1>
+      <p class="hero-sub">Dates · Cafes · Adventure · Restaurants · Trips<br>Step into your next experience</p>
+      <div class="hero-cta-row">
+        <button class="btn-primary" onclick="document.getElementById('explore').scrollIntoView({behavior:'smooth'})">Enter The World</button>
+        <button class="btn-ghost" onclick="document.getElementById('ai-section').scrollIntoView({behavior:'smooth'})">Meet AI Agent</button>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-scroll"><div class="sline"></div><span>Scroll to explore</span></div>
+    </div>
+  </div>
+</section>
+ 
+<style>
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+#hero .hero-content{z-index:10;padding-top:120px}
+</style>
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  const canvas = document.getElementById('hero-canvas');
+  const W = ()=> canvas.offsetWidth;
+  const H = ()=> canvas.offsetHeight;
+ 
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(W(), H());
+  renderer.setClearColor(0x000000, 1);
+ 
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x000000, 0.007);
+ 
+  const camera = new THREE.PerspectiveCamera(70, W()/H(), 0.1, 1000);
+  camera.position.set(0, 0, 120);
+  camera.lookAt(0, 0, 0);
+ 
+  // ── WORMHOLE TUNNEL PARTICLES ──
+  const tunnelCount = 8000;
+  const tunnelGeo = new THREE.BufferGeometry();
+  const tunnelPos = new Float32Array(tunnelCount * 3);
+  const tunnelCol = new Float32Array(tunnelCount * 3);
+ 
+  for(let i = 0; i < tunnelCount; i++){
+    const t = (i / tunnelCount) * Math.PI * 2 * 20;
+    const radius = 18 + Math.random() * 8;
+    const depth = (Math.random() - 0.5) * 300;
+ 
+    tunnelPos[i*3]   = Math.cos(t) * radius + (Math.random()-0.5)*4;
+    tunnelPos[i*3+1] = Math.sin(t) * radius + (Math.random()-0.5)*4;
+    tunnelPos[i*3+2] = depth;
+ 
+    // saffron to white gradient based on depth
+    const d = (depth + 150) / 300;
+    if(Math.random() > 0.7){
+      // saffron particles
+      tunnelCol[i*3]   = 1.0;
+      tunnelCol[i*3+1] = 0.42 * d;
+      tunnelCol[i*3+2] = 0.0;
+    } else {
+      // white/grey particles
+      const b = 0.3 + d * 0.7;
+      tunnelCol[i*3]   = b;
+      tunnelCol[i*3+1] = b;
+      tunnelCol[i*3+2] = b;
+    }
+  }
+ 
+  tunnelGeo.setAttribute('position', new THREE.BufferAttribute(tunnelPos, 3));
+  tunnelGeo.setAttribute('color',    new THREE.BufferAttribute(tunnelCol, 3));
+ 
+  const tunnelMat = new THREE.PointsMaterial({
+    size: 0.5,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.8
+  });
+ 
+  const tunnel = new THREE.Points(tunnelGeo, tunnelMat);
+  scene.add(tunnel);
+ 
+  // ── PORTAL RINGS ──
+  const ringColors = [0xFF6B00, 0xFF8C35, 0xFFAA55, 0xFFFFFF, 0xFF4400];
+  const rings = [];
+ 
+  for(let r = 0; r < 8; r++){
+    const radius = 5 + r * 3.5;
+    const segments = 128;
+    const ringGeo = new THREE.BufferGeometry();
+    const ringPos = new Float32Array(segments * 3);
+ 
+    for(let s = 0; s < segments; s++){
+      const angle = (s / segments) * Math.PI * 2;
+      ringPos[s*3]   = Math.cos(angle) * radius;
+      ringPos[s*3+1] = Math.sin(angle) * radius;
+      ringPos[s*3+2] = 0;
+    }
+ 
+    ringGeo.setAttribute('position', new THREE.BufferAttribute(ringPos, 3));
+ 
+    const opacity = 1 - r * 0.1;
+    const color = ringColors[r % ringColors.length];
+    const ringMat = new THREE.PointsMaterial({
+      size: r < 3 ? 1.2 : 0.6,
+      color: color,
+      transparent: true,
+      opacity: opacity
+    });
+ 
+    const ring = new THREE.Points(ringGeo, ringMat);
+    ring.userData.baseRadius = radius;
+    ring.userData.speed = 0.008 + r * 0.003;
+    ring.userData.direction = r % 2 === 0 ? 1 : -1;
+    scene.add(ring);
+    rings.push(ring);
+  }
+ 
+  // ── PORTAL CORE GLOW ──
+  const coreCount = 3000;
+  const coreGeo = new THREE.BufferGeometry();
+  const corePos = new Float32Array(coreCount * 3);
+  const coreCol = new Float32Array(coreCount * 3);
+ 
+  for(let i = 0; i < coreCount; i++){
+    const angle = Math.random() * Math.PI * 2;
+    const r = Math.random() * 14;
+    corePos[i*3]   = Math.cos(angle) * r;
+    corePos[i*3+1] = Math.sin(angle) * r;
+    corePos[i*3+2] = -Math.random() * 40;
+ 
+    // deep blue/purple core
+    const b = Math.random();
+    if(b > 0.6){
+      coreCol[i*3]   = 0.3;
+      coreCol[i*3+1] = 0.2;
+      coreCol[i*3+2] = 0.8;
+    } else {
+      coreCol[i*3]   = 0.15;
+      coreCol[i*3+1] = 0.05;
+      coreCol[i*3+2] = 0.5;
+    }
+  }
+ 
+  coreGeo.setAttribute('position', new THREE.BufferAttribute(corePos, 3));
+  coreGeo.setAttribute('color',    new THREE.BufferAttribute(coreCol, 3));
+ 
+  const coreMat = new THREE.PointsMaterial({
+    size: 0.8,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.7
+  });
+ 
+  scene.add(new THREE.Points(coreGeo, coreMat));
+ 
+  // ── FLOATING STARS ──
+  const starCount = 5000;
+  const starGeo = new THREE.BufferGeometry();
+  const starPos = new Float32Array(starCount * 3);
+ 
+  for(let i = 0; i < starCount; i++){
+    starPos[i*3]   = (Math.random()-0.5) * 500;
+    starPos[i*3+1] = (Math.random()-0.5) * 500;
+    starPos[i*3+2] = -50 - Math.random() * 200;
+  }
+ 
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  const starMat = new THREE.PointsMaterial({
+    size: 0.3,
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.5
+  });
+  scene.add(new THREE.Points(starGeo, starMat));
+ 
+  // ── MOUSE ──
+  let mx=0, my=0, tmx=0, tmy=0;
+  document.addEventListener('mousemove', e=>{
+    mx = (e.clientX / window.innerWidth  - 0.5) * 2;
+    my = (e.clientY / window.innerHeight - 0.5) * 2;
+  });
+ 
+  window.addEventListener('resize', ()=>{
+    renderer.setSize(W(), H());
+    camera.aspect = W() / H();
+    camera.updateProjectionMatrix();
+  });
+ 
+  // ── ANIMATE ──
+  let frame = 0;
+  function animate(){
+    requestAnimationFrame(animate);
+    frame++;
+ 
+    tmx += (mx - tmx) * 0.04;
+    tmy += (my - tmy) * 0.04;
+ 
+    const scroll  = window.scrollY;
+    const heroH   = document.getElementById('hero').offsetHeight || window.innerHeight;
+    const sp      = Math.min(scroll / heroH, 1);
+ 
+    // Camera fly into portal on scroll
+    camera.position.x = tmx * 12;
+    camera.position.y = tmy * -8;
+    camera.position.z = 120 - sp * 130;
+    camera.lookAt(tmx * 5, tmy * -3, -50);
+ 
+    // Rotate tunnel
+    tunnel.rotation.z = frame * 0.001;
+ 
+    // Rotate rings — alternating directions + pulse
+    rings.forEach((ring, i) => {
+      ring.rotation.z += ring.userData.speed * ring.userData.direction;
+      // tilt with mouse
+      ring.rotation.x = tmy * 0.3 + Math.sin(frame*0.01 + i*0.5)*0.05;
+      ring.rotation.y = tmx * 0.3;
+      // pulse size
+      const pulse = 1 + Math.sin(frame * 0.03 + i * 0.4) * 0.08;
+      ring.scale.set(pulse, pulse, 1);
+    });
+ 
+    // Tunnel particles drift inward
+    const positions = tunnel.geometry.attributes.position.array;
+    for(let i = 0; i < tunnelCount; i++){
+      positions[i*3+2] += 0.3; // move toward camera
+      if(positions[i*3+2] > 60) positions[i*3+2] = -150; // reset
+    }
+    tunnel.geometry.attributes.position.needsUpdate = true;
+ 
+    // Opacity pulse
+    tunnelMat.opacity = 0.7 + Math.sin(frame * 0.02) * 0.15;
+ 
+    renderer.render(scene, camera);
+  }
+  animate();
+ 
+})();
+</script>
+
+<!-- STATS — BLACK -->
+<div id="stats">
+  <div class="stat"><div class="stn"><span>240</span>+</div><div class="stl">Destinations worldwide</div></div>
+  <div class="stat"><div class="stn"><span>18</span>K</div><div class="stl">Events listed</div></div>
+  <div class="stat"><div class="stn"><span>4.9</span></div><div class="stl">Average rating</div></div>
+  <div class="stat"><div class="stn"><span>92</span>K</div><div class="stl">Happy explorers</div></div>
+</div>
+
+<!-- MARQUEE — BLACK -->
+<div class="mq-wrap">
+  <div class="mq-track">
+    <span class="mq-item">Travel<div class="mqdot"></div></span>
+    <span class="mq-item">Adventure<div class="mqdot"></div></span>
+    <span class="mq-item">Concerts<div class="mqdot"></div></span>
+    <span class="mq-item">Sports<div class="mqdot"></div></span>
+    <span class="mq-item">Fine Dining<div class="mqdot"></div></span>
+    <span class="mq-item">Cafes<div class="mqdot"></div></span>
+    <span class="mq-item">Weekend Trips<div class="mqdot"></div></span>
+    <span class="mq-item">Live Events<div class="mqdot"></div></span>
+    <span class="mq-item">Travel<div class="mqdot"></div></span>
+    <span class="mq-item">Adventure<div class="mqdot"></div></span>
+    <span class="mq-item">Concerts<div class="mqdot"></div></span>
+    <span class="mq-item">Sports<div class="mqdot"></div></span>
+    <span class="mq-item">Fine Dining<div class="mqdot"></div></span>
+    <span class="mq-item">Cafes<div class="mqdot"></div></span>
+    <span class="mq-item">Weekend Trips<div class="mqdot"></div></span>
+    <span class="mq-item">Live Events<div class="mqdot"></div></span>
+  </div>
+</div>
+
+<!-- EXPLORE — WHITE -->
+<section id="explore">
+  <div class="slabel-d">Discover</div>
+  <div class="stitle-d">What are you<br><span class="dim">exploring today?</span></div>
+  <div class="search-row">
+  <input type="text" id="search-inp" placeholder="Search cafes, places, restaurants..." 
+  oninput="searchCards(this.value)"/>
+</div>
+  <div class="cat-row" id="cat-row">
+   <button class="cat-btn active" data-cat="travel">Trips</button>
+<button class="cat-btn" data-cat="shows">Dates</button>
+<button class="cat-btn" data-cat="sports">Adventure</button>
+<button class="cat-btn" data-cat="cafes">Cafes</button>
+<button class="cat-btn" data-cat="restaurants">Restaurants</button>
+  </div>
+  <div class="cards-grid" id="cards-grid"></div>
+</section>
+
+<!-- FEATURED — WHITE -->
+<div id="fstrip-wrap">
+  <div id="fstrip"></div>
+</div>
+
+<!-- AI SECTION — WHITE -->
+<section id="ai-section">
+  <div class="slabel-d">AI Agent</div>
+  <div class="stitle-d">Your personal<br><span class="dim">exploration guide</span></div>
+  <div class="ai-grid">
+    <div class="ai-info">
+      <p>XplorX AI plans your entire experience — from flights to dinner reservations. Just tell it what you want, voice or text, Hindi or English.</p>
+      <div class="ai-features">
+        <div class="ai-feat"><div class="afn">01</div><div><div class="aft">Natural language booking</div><div class="afd">Say "Plan a Goa trip this weekend for 2" — it books flights, hotel, and activities.</div></div></div>
+        <div class="ai-feat"><div class="afn">02</div><div><div class="aft">Voice + text input</div><div class="afd">Speak in Hindi or English. The AI understands and responds instantly.</div></div></div>
+        <div class="ai-feat"><div class="afn">03</div><div><div class="aft">Smart recommendations</div><div class="afd">Based on your location, budget, and past trips — suggests the best options.</div></div></div>
+        <div class="ai-feat"><div class="afn">04</div><div><div class="aft">One-tap checkout</div><div class="afd">Review the plan, confirm, pay — all within the conversation.</div></div></div>
+      </div>
+    </div>
+    <div class="ai-chat">
+      <div class="aich">
+        <div class="aiav"></div>
+        <div><div class="ainame">Xplore AI</div><div class="aisub">Powered by Claude · Always on</div></div>
+        <div class="aionl">Status: <span>Online</span></div>
+      </div>
+      <div class="chat-msgs" id="chat-msgs">
+        <div class="cm ai"><div class="cmb">Hey! I'm Xplore AI. Tell me where you want to go, what you want to watch, eat, or do — I'll plan and book it all for you.</div><div class="cmt">Just now</div></div>
+        <div class="tind" id="tind"><span></span><span></span><span></span></div>
+      </div>
+      <div class="chat-sugs">
+        <button class="sug" onclick="qs(this)">Plan Mumbai trip 3 days</button>
+        <button class="sug" onclick="qs(this)">IPL match tickets</button>
+        <button class="sug" onclick="qs(this)">Best cafes in Pune</button>
+        <button class="sug" onclick="qs(this)">Goa weekend</button>
+        <button class="sug" onclick="qs(this)">Concert this weekend</button>
+      </div>
+      <div class="chat-irow">
+        <input class="cinp" id="cinp" placeholder="Ask anything — travel, events, food..." />
+        <button class="bmic" id="micbtn" onclick="toggleMic()">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
+        </button>
+        <button class="bsend" onclick="sendChat()">
+          <svg viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER — BLACK -->
+<section id="newsletter">
+  <div class="nl-l">
+    <h3>Stay in<br>the loop</h3>
+    <p>Best deals on trips, concerts, sports, and dining — every week in your inbox.</p>
+  </div>
+  <div class="nl-r">
+    <div class="nl-row">
+      <input class="nlinp" placeholder="your@email.com" type="email" />
+      <button class="nlsub">Subscribe</button>
+    </div>
+    <div class="nlnote">No spam. Unsubscribe anytime.</div>
+  </div>
+</section>
+
+<!-- FOOTER — BLACK -->
+<footer id="footer">
+  <div>
+    <div class="flogo">XplorX</div>
+    <p style="font-size:12px;color:rgba(255,255,255,0.22);margin-top:14px;line-height:1.8;max-width:210px">Explore the world with AI — travel, events, sports, dining in one place.</p>
+  </div>
+  <div>
+    <div class="fcol-t">Explore</div>
+    <div class="flinks"><a href="#">Travel & Trips</a><a href="#">Shows & Concerts</a><a href="#">Sports Events</a><a href="#">Cafes & Restaurants</a></div>
+  </div>
+  <div>
+    <div class="fcol-t">Company</div>
+    <div class="flinks"><a href="#">About Us</a><a href="#">Careers</a><a href="#">Press</a><a href="#">Blog</a></div>
+  </div>
+  <div>
+    <div class="fcol-t">Contact</div>
+    <div class="flinks"><a href="#">hello@xplorx.in</a><a href="#">Instagram</a><a href="#">Twitter / X</a><a href="#">LinkedIn</a></div>
+  </div>
+</footer>
+<div class="fbot">
+  <div class="fcopy">© 2026 XplorX. All rights reserved.</div>
+  <div class="fcopy">Built with passion in India</div>
+</div>
+
+<script>
+const cur=document.getElementById('cursor'),curR=document.getElementById('cursor-ring');
+let cx=0,cy=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{cx=e.clientX;cy=e.clientY;});
+(function ac(){cur.style.left=cx+'px';cur.style.top=cy+'px';rx+=(cx-rx)*0.13;ry+=(cy-ry)*0.13;curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(ac);})();
+
+let p=0;
+const lf=document.getElementById('lf'),lp=document.getElementById('lp'),ld=document.getElementById('loading');
+const li=setInterval(()=>{p+=2+Math.random()*5;if(p>=100){p=100;clearInterval(li);setTimeout(()=>ld.classList.add('hidden'),300);}lf.style.width=p+'%';lp.textContent=Math.round(p)+'%';},40);
+
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('sc',scrollY>60));
+
+const CARDS={
+  travel:[
+  {name:'Lonavala',tag:'Waterfalls + Cafes · 65km',price:'From ₹2,500',rating:'4.9',
+  img:'https://images.unsplash.com/photo-1670258896861-b77a8cf6075c?w=600&q=80&fit=crop'},
+
+  {name:'Mahabaleshwar',tag:'Cool Weather · 120km',price:'From ₹4,500',rating:'4.9',
+  img:'https://images.unsplash.com/photo-1618805714320-f8825019c1be?w=600&q=80&fit=crop'},
+
+  {name:'Pawna Lake',tag:'Camping + Night Vibe · 80km',price:'From ₹1,800',rating:'4.8',
+  img:'https://images.unsplash.com/photo-1595084305818-84c2daca7482?w=600&q=80&fit=crop'},
+
+  {name:'Lavasa',tag:'Luxury Lake Drive · 60km',price:'From ₹5,000',rating:'4.7',
+  img:'https://images.unsplash.com/photo-1590935721926-ec950989f8db?w=600&q=80&fit=crop'},
+
+  {name:'Mulshi Lake',tag:'Long Drive + Calm · 45km',price:'From ₹1,500',rating:'4.8',
+  img:'https://images.unsplash.com/photo-1675788384262-4c4a95cdfe48?w=600&q=80&fit=crop'},
+
+  {name:'Sinhagad Fort',tag:'Trekking + Sunrise · 30km',price:'From ₹500',rating:'4.7',
+  img:'https://plus.unsplash.com/premium_photo-1676487748067-4da1e9afa701?w=600&q=80&fit=crop'},
+],
+ shows:[
+  {name:"Dario's Cafe",tag:'Romantic · Koregaon Park',price:'₹1,600/head',rating:'4.9',
+  img:'https://lh3.googleusercontent.com/gps-cs-s/APNQkAFg5z3dj277Nw8ESv0WoClWwtDWg5WXTZGaHrCsW3C3rpvgJmIZ96vT6iV2r0euAxvGHkJcbrwjHc1BWCficgMguPSmW9JBx_BJHPy11X4Y2ut3KcR-iDIndojzHoo-tq0u5ywBqGKQ3zY7=s1360-w1360-h1020-rw'},
+
+  {name:'Le Plaisir',tag:'European Vibe · Date Night',price:'₹1,400/head',rating:'4.8',
+  img:'https://lh3.googleusercontent.com/p/AF1QipOaFGMngaSvtFXHUG-jJlV68JGeE2lewA50q590=s1360-w1360-h1020-rw'},
+
+  {name:'Paasha Rooftop',tag:'JW Marriott · Luxury',price:'₹2,500/head',rating:'4.9',
+  img:'https://lh3.googleusercontent.com/gps-cs-s/APNQkAHIcrHxjZjrzAnN1qjA9q3Ghp413BPdB2wDdD6twoZ39JyihLtl5tFRqKI9OhTT9DlbBLzG8BxGwOztdK__UEqu9AYss0uqJX6B8EvaJuaHNQ-QSz1zWW1laTMz2mfxP88nnNQ=s1360-w1360-h1020-rw'},
+
+  {name:'French Window',tag:'Romantic Cafe · Baner',price:'₹800/head',rating:'4.7',
+  img:'https://lh3.googleusercontent.com/gps-cs-s/APNQkAGca6X6urwhgJe7uGd8-4Pt9mu-nml1wVVcb2PQKdXcx9oxT8RSesFsJHJZkVn0xbOAKKaGogt4NTaZsSsJ6UX3I7LjeGSxjD05mttiF1YI_5WWdULztSomVWty-Snd_sjTjftkuiCvwIKF=s1360-w1360-h1020-rw'},
+
+  {name:'Cafe Kathaa',tag:'Cozy · Deep Conversations',price:'₹600/head',rating:'4.8',
+  img:'https://lh3.googleusercontent.com/gps-cs-s/APNQkAFkYL53nosk8yajB_cyu3aYhQwq6eaHk0-4I8OVn_rFY4DPGyC8lxmY59dUxS2Al3QevxhRX9MVS8pGcEMRGJqJPb2XKhKvHtPyz80A9GJ8d6GcclN9aRqvtpEB8NKRXX98jW1PFMGcbcaq=s1360-w1360-h1020-rw'},
+
+  {name:'Aasmana Ritz',tag:'Ultra Luxury · Rooftop',price:'₹3,500/head',rating:'5.0',
+  img:'https://lh3.googleusercontent.com/p/AF1QipObwaUn3hJALMj8B2S_XBz91-OvhX4_8M0HayAt=s1360-w1360-h1020-rw'},
+],
+  sports:[
+    {name:'IPL 2026',tag:'Cricket · Wankhede',price:'₹1,200 onwards',rating:'4.8',shape:'cube',ac:'#080618'},
+    {name:'ISL Final',tag:'Football · Bengaluru',price:'₹600 onwards',rating:'4.7',shape:'sphere',ac:'#061008'},
+    {name:'Pro Kabaddi',tag:'Kabaddi · Pune',price:'₹350 onwards',rating:'4.5',shape:'octa',ac:'#140800'},
+  ],
+  cafes:[
+    {name:'Pagdandi',tag:'Books + Coffee · Baner',price:'₹350 avg',rating:'4.9',shape:'torus',ac:'#0a0600'},
+    {name:'Flour Works',tag:'Artisan Brunch · KP',price:'₹500 avg',rating:'4.7',shape:'cube',ac:'#0c0800'},
+    {name:'Vohuman',tag:'Legendary · Since 1954',price:'₹180 avg',rating:'4.8',shape:'sphere',ac:'#080408'},
+  ],
+  restaurants:[
+    {name:'Saptarishi',tag:'Fine Dining · Rooftop',price:'₹1,800/head',rating:'4.9',shape:'octa',ac:'#140400'},
+    {name:'Varas',tag:'Maharashtrian · Authentic',price:'₹1,400/head',rating:'4.9',shape:'torus',ac:'#081004'},
+    {name:"Dario's",tag:'Italian · Romantic',price:'₹1,600/head',rating:'4.8',shape:'cube',ac:'#040418'},
+  ]
+};
+
+function makeShape(shape,speed){
+  const s=['spin-a','spin-b','spin-c'][speed%3];
+  if(shape==='cube')return`<div class="css3d ${s}"><div class="cface cf1"></div><div class="cface cf2"></div><div class="cface cf3"></div><div class="cface cf4"></div><div class="cface cf5"></div><div class="cface cf6"></div></div>`;
+  if(shape==='octa')return`<div class="octa"><div class="oface of1"></div><div class="oface of2"></div><div class="oface of3"></div><div class="oface of4"></div></div>`;
+  if(shape==='torus')return`<div class="torus-wrap"><div class="torus-ring tr1"></div><div class="torus-ring tr2"></div></div>`;
+  return`<div class="sphere-wrap"><div class="sph-ring sr1"></div><div class="sph-ring sr2"></div><div class="sph-ring sr3"></div><div class="sph-ring sr4"></div></div>`;
+}
+
+async function buildCards(cat){
+  const g=document.getElementById('cards-grid');
+  g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(0,0,0,0.3)">Loading...</div>';
+
+  // Supabase se fetch karo
+  const catMap = {
+    travel:'travel', shows:'date', sports:'adventure',
+    cafes:'cafe', restaurants:'restaurant'
+  };
+
+  const {data, error} = await _supabase
+    .from('cafes')
+    .select('*')
+    .eq('category', catMap[cat] || cat);
+
+  // Agar Supabase mein data hai toh woh dikhao
+  const cards = (data && data.length > 0) ? data : (CARDS[cat] || []);
+
+  g.innerHTML='';
+  cards.forEach((d,i)=>{
+    const div=document.createElement('div');div.className='card';
+    const img = d.image_url || d.img;
+    const tag = d.tag || (d.area ? `${d.category} · ${d.area}` : d.category);
+    const name = d.name;
+    const price = d.price;
+    const rating = d.rating;
+    if(img){
+      div.innerHTML=`
+        <div class="card-scene" style="background:#111;overflow:hidden;padding:0">
+          <img src="${img}" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.6s cubic-bezier(0.16,1,0.3,1)"
+          onmouseover="this.style.transform='scale(1.08)'"
+          onmouseout="this.style.transform='scale(1)'"/>
+        </div>
+        <div class="card-overlay">
+          <div class="ctag">${tag}</div>
+          <div class="cname">${name}</div>
+          <div class="cprice">${price||''}</div>
+        </div>
+        <div class="cbadge">⭐${rating||''}</div>`;
+    } else {
+      div.innerHTML=`<div class="card-scene" style="background:${d.ac||'#111'}">${makeShape(d.shape||'cube',i)}</div><div class="card-overlay"><div class="ctag">${tag}</div><div class="cname">${name}</div><div class="cprice">${price||''}</div></div><div class="cbadge">${rating||''}</div>`;
+    }
+    g.appendChild(div);
+  });
+}
+document.getElementById('cat-row').addEventListener('click',e=>{
+  const b=e.target.closest('.cat-btn');if(!b)return;
+  document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  currentCat = b.dataset.cat;
+  currentArea = 'all';
+  document.getElementById('search-inp').value = '';
+  buildCards(b.dataset.cat);
+});
+buildCards('travel');
+
+const featured=[
+  {name:'Leh-Ladakh',tag:'Adventure',
+  img:'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?w=600&q=80&fit=crop'},
+
+  {name:'Coorg',tag:'Nature Retreat',
+  img:'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?w=600&q=80&fit=crop'},
+
+  {name:'Udaipur',tag:'Romantic Getaway',
+  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Udaipur_Lake_India.JPG/1280px-Udaipur_Lake_India.JPG'},
+
+  {name:'Meghalaya',tag:'Hidden Gem',
+  img:'https://images.unsplash.com/photo-1664175756882-a977ef952b94?w=600&q=80&fit=crop'},
+
+  {name:'Kashid Beach',tag:'Offbeat Coast',
+  img:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80&fit=crop'},
+];
+const strip=document.getElementById('fstrip');
+featured.forEach((d,i)=>{
+  const div=document.createElement('div');div.className='scard';
+  div.innerHTML=`
+    <div class="scard-inner" style="background:#111;padding:0;overflow:hidden">
+      <img src="${d.img}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.6s ease" 
+      onmouseover="this.style.transform='scale(1.08)'" 
+      onmouseout="this.style.transform='scale(1)'"/>
+    </div>
+    <div class="sinfo">
+      <div class="stag">${d.tag}</div>
+      <div class="sname">${d.name}</div>
+    </div>`;
+  strip.appendChild(div);
+});
+
+const REPS={
+  mumbai:['Found amazing Mumbai packages!','3D/2N from ₹8,500 — Gateway, Marine Drive, street food tour. Book it?'],
+  ipl:['IPL 2026 tickets available!','MI vs CSK at Wankhede — ₹1,200 (Gen) to ₹8,500 (Premium). Check availability?'],
+  cafe:['Top Pune cafes found!','Pagdandi (Baner), The Flour Works (KP), Vohuman (Camp). Reserve a table?'],
+  goa:['Goa weekend sorted!','2N/3D — Calangute resort + scooter + beach shacks. ₹6,800/person. Book now?'],
+  concert:['Live music this weekend!','Prateek Kuhad (Pune, Apr 26) · Seedhe Maut (Mumbai, Apr 27). Want tickets?'],
+  def:['On it! Searching for you...','Found great options matching your request. Want me to show the best picks?'],
+};
+function getRep(t){
+  t=t.toLowerCase();
+  if(t.includes('mumbai')||t.includes('trip'))return REPS.mumbai;
+  if(t.includes('ipl')||t.includes('cricket'))return REPS.ipl;
+  if(t.includes('cafe')||t.includes('coffee')||t.includes('pune'))return REPS.cafe;
+  if(t.includes('goa')||t.includes('beach'))return REPS.goa;
+  if(t.includes('concert')||t.includes('show'))return REPS.concert;
+  return REPS.def;
+}
+function addMsg(text,type){
+  const a=document.getElementById('chat-msgs'),ti=document.getElementById('tind');
+  const d=document.createElement('div');d.className=`cm ${type}`;
+  d.innerHTML=`<div class="cmb">${text}</div><div class="cmt">Just now</div>`;
+  a.insertBefore(d,ti);a.scrollTop=9999;
+}
+function sendChat(){
+  const inp=document.getElementById('cinp'),txt=inp.value.trim();if(!txt)return;
+  inp.value='';addMsg(txt,'user');
+  document.getElementById('tind').classList.add('show');
+  document.getElementById('chat-msgs').scrollTop=9999;
+  const r=getRep(txt);
+  setTimeout(()=>{document.getElementById('tind').classList.remove('show');r.forEach((m,i)=>setTimeout(()=>addMsg(m,'ai'),i*700));},1400);
+}
+function qs(el){document.getElementById('cinp').value=el.textContent;sendChat();}
+document.getElementById('cinp').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
+let micOn=false,recog=null;
+function toggleMic(){
+  micOn=!micOn;
+  const b=document.getElementById('micbtn');b.classList.toggle('on',micOn);
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(micOn&&SR){
+    recog=new SR();recog.lang='en-IN';recog.interimResults=true;
+    recog.onresult=e=>{let s='';for(let i=e.resultIndex;i<e.results.length;i++)s+=e.results[i][0].transcript;document.getElementById('cinp').value=s;};
+    recog.onend=()=>{micOn=false;b.classList.remove('on');const v=document.getElementById('cinp').value.trim();if(v)sendChat();};
+    recog.start();
+  }else if(recog){recog.stop();}
+}
+document.querySelectorAll('.card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=((e.clientX-r.left)/r.width-0.5)*18;
+    const y=((e.clientY-r.top)/r.height-0.5)*-18;
+    card.style.transform=`perspective(600px) rotateX(${y}deg) rotateY(${x}deg) translateY(-8px)`;
+  });
+  card.addEventListener('mouseleave',()=>{
+    card.style.transform='';
+  });
+});
+
+let currentArea = 'all';
+let currentCat = 'travel';
+
+function searchCards(query){
+  const cards = CARDS[currentCat];
+  query = query.toLowerCase().trim();
+  
+  const filtered = cards.filter(d=>{
+    const nameMatch = d.name.toLowerCase().includes(query);
+    const tagMatch = d.tag.toLowerCase().includes(query);
+    const areaMatch = currentArea === 'all' || 
+                      d.tag.toLowerCase().includes(currentArea.toLowerCase());
+    
+    if(query === '') return areaMatch;
+    return (nameMatch || tagMatch) && areaMatch;
+  });
+  
+  renderFiltered(filtered);
+}
+
+function filterArea(area, btn){
+  currentArea = area;
+  document.querySelectorAll('.area-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  searchCards(document.getElementById('search-inp').value);
+}
+
+function renderFiltered(cards){
+  const g = document.getElementById('cards-grid');
+  g.innerHTML = '';
+  if(cards.length === 0){
+    g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(0,0,0,0.3);font-size:14px">No results found</div>';
+    return;
+  }
+  cards.forEach((d,i)=>{
+    const div = document.createElement('div');
+    div.className = 'card';
+    if(d.img){
+      div.innerHTML=`
+        <div class="card-scene" style="background:#111;overflow:hidden;padding:0">
+          <img src="${d.img}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.6s ease"
+          onmouseover="this.style.transform='scale(1.08)'"
+          onmouseout="this.style.transform='scale(1)'"/>
+        </div>
+        <div class="card-overlay">
+          <div class="ctag">${d.tag}</div>
+          <div class="cname">${d.name}</div>
+          <div class="cprice">${d.price}</div>
+        </div>
+        <div class="cbadge">⭐${d.rating}</div>`;
+    } else {
+      div.innerHTML=`<div class="card-scene" style="background:${d.ac}">${makeShape(d.shape,i)}</div><div class="card-overlay"><div class="ctag">${d.tag}</div><div class="cname">${d.name}</div><div class="cprice">${d.price}</div></div><div class="cbadge">${d.rating}</div>`;
+    }
+    g.appendChild(div);
+  });
+}
+</script>
+</body>
+</html>

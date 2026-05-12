@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XplorX Admin — Cafe Owner Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --black:#000;--white:#fff;--off-white:#FAFAF8;
+  --saffron:#FF6B00;--saffronL:#FF8C35;
+  --g1:rgba(0,0,0,0.06);--g2:rgba(0,0,0,0.1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--off-white);color:var(--black);min-height:100vh}
+
+/* ── AUTH PAGE ── */
+#auth-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#000}
+.auth-box{width:100%;max-width:420px;padding:48px;background:#111;border:0.5px solid rgba(255,255,255,0.08);border-radius:16px}
+.auth-logo{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:0.14em;color:var(--saffron);margin-bottom:8px}
+.auth-sub{font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:36px}
+.auth-tabs{display:flex;gap:0;margin-bottom:28px;border:0.5px solid rgba(255,255,255,0.1);border-radius:8px;overflow:hidden}
+.auth-tab{flex:1;padding:10px;text-align:center;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;background:transparent;border:none;color:rgba(255,255,255,0.3);transition:all 0.3s;font-family:'DM Sans',sans-serif}
+.auth-tab.active{background:var(--saffron);color:#fff}
+.form-group{margin-bottom:18px}
+.form-label{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:8px;display:block}
+.form-input{width:100%;padding:12px 16px;background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;color:#fff;outline:none;font-family:'DM Sans',sans-serif;transition:border-color 0.3s}
+.form-input::placeholder{color:rgba(255,255,255,0.2)}
+.form-input:focus{border-color:var(--saffron)}
+.auth-btn{width:100%;padding:14px;background:var(--saffron);color:#fff;border:none;border-radius:8px;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:all 0.3s;margin-top:8px}
+.auth-btn:hover{background:var(--saffronL)}
+.auth-msg{font-size:12px;text-align:center;margin-top:14px;color:rgba(255,255,255,0.4)}
+.auth-err{color:#ff4444;font-size:12px;margin-top:10px;text-align:center;display:none}
+.auth-suc{color:#44ff88;font-size:12px;margin-top:10px;text-align:center;display:none}
+
+/* ── DASHBOARD ── */
+#dashboard{display:none}
+.dash-nav{background:#000;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.dash-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.14em;color:var(--saffron)}
+.dash-user{font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:0.08em}
+.dash-logout{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;background:transparent;border:0.5px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);padding:8px 16px;border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.3s}
+.dash-logout:hover{border-color:var(--saffron);color:var(--saffron)}
+
+.dash-body{padding:40px 32px;max-width:1100px;margin:0 auto}
+.dash-title{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:0.04em;color:var(--black);margin-bottom:6px}
+.dash-subtitle{font-size:13px;color:rgba(0,0,0,0.4);margin-bottom:36px}
+
+/* TABS */
+.dash-tabs{display:flex;gap:8px;margin-bottom:32px}
+.dash-tab{padding:10px 24px;border:1px solid rgba(0,0,0,0.1);border-radius:24px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;background:#fff;color:rgba(0,0,0,0.4);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.25s}
+.dash-tab:hover{border-color:var(--saffron);color:var(--saffron)}
+.dash-tab.active{background:var(--saffron);color:#fff;border-color:var(--saffron)}
+
+/* SECTION */
+.dash-section{display:none}
+.dash-section.active{display:block}
+
+/* ADD LISTING FORM */
+.form-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;padding:32px;margin-bottom:24px;box-shadow:0 2px 12px rgba(0,0,0,0.04)}
+.form-card-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.06em;margin-bottom:24px;color:var(--black)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.form-group-d{display:flex;flex-direction:column;gap:6px}
+.form-group-d.full{grid-column:1/-1}
+.label-d{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(0,0,0,0.75);font-weight:600}
+.input-d{padding:12px 16px;border:1px solid rgba(0,0,0,0.1);border-radius:8px;font-size:14px;color:var(--black);outline:none;font-family:'DM Sans',sans-serif;transition:border-color 0.3s;background:#fff}
+.input-d:focus{border-color:var(--saffron)}
+.input-d::placeholder{color:rgba(0,0,0,0.25)}
+select.input-d{cursor:pointer}
+textarea.input-d{resize:vertical;min-height:90px}
+
+/* IMAGE PREVIEW */
+.img-preview{width:100%;height:160px;border:1.5px dashed rgba(0,0,0,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fafafa;margin-top:8px}
+.img-preview img{width:100%;height:100%;object-fit:cover;display:none}
+.img-placeholder{font-size:12px;color:rgba(0,0,0,0.25);text-align:center;line-height:1.8}
+
+.submit-btn{margin-top:24px;padding:14px 36px;background:var(--saffron);color:#fff;border:none;border-radius:8px;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:all 0.3s}
+.submit-btn:hover{background:var(--saffronL);transform:translateY(-1px)}
+.submit-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.form-success{display:none;color:#22c55e;font-size:13px;margin-top:12px;font-weight:500}
+.form-error{display:none;color:#ef4444;font-size:13px;margin-top:12px}
+
+/* MY LISTINGS */
+.listings-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.listing-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.listing-img{width:100%;height:160px;object-fit:cover;background:#f0f0f0;display:block}
+.listing-img-placeholder{width:100%;height:160px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(0,0,0,0.25);text-transform:uppercase;letter-spacing:0.1em}
+.listing-body{padding:16px}
+.listing-cat{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--saffron);margin-bottom:4px;font-weight:500}
+.listing-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.06em;color:var(--black);margin-bottom:4px}
+.listing-area{font-size:11px;color:rgba(0,0,0,0.4);margin-bottom:12px}
+.listing-actions{display:flex;gap:8px}
+.lbtn{flex:1;padding:8px;border-radius:6px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;border:1px solid rgba(0,0,0,0.1);background:transparent;color:rgba(0,0,0,0.5)}
+.lbtn:hover{border-color:var(--saffron);color:var(--saffron)}
+.lbtn.del:hover{border-color:#ef4444;color:#ef4444}
+.empty-state{text-align:center;padding:60px;color:rgba(0,0,0,0.3)}
+.empty-icon{font-size:48px;margin-bottom:16px}
+.empty-text{font-size:14px}
+
+/* BOOKINGS */
+.booking-table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.booking-table th{padding:14px 18px;text-align:left;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(0,0,0,0.4);border-bottom:1px solid rgba(0,0,0,0.06);background:#fafafa}
+.booking-table td{padding:14px 18px;font-size:13px;color:var(--black);border-bottom:1px solid rgba(0,0,0,0.04)}
+.booking-table tr:last-child td{border-bottom:none}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase}
+.status-pending{background:rgba(255,107,0,0.1);color:var(--saffron)}
+.status-confirmed{background:rgba(34,197,94,0.1);color:#16a34a}
+.status-cancelled{background:rgba(239,68,68,0.1);color:#dc2626}
+.confirm-btn{padding:5px 12px;background:var(--saffron);color:#fff;border:none;border-radius:6px;font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.2s}
+.confirm-btn:hover{background:var(--saffronL)}
+
+/* LOADING */
+.loading{text-align:center;padding:40px;color:rgba(0,0,0,0.3);font-size:13px}
+
+@media(max-width:768px){
+  .form-grid{grid-template-columns:1fr}
+  .listings-grid{grid-template-columns:1fr}
+  .dash-body{padding:24px 16px}
+  .booking-table{font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH PAGE -->
+<div id="auth-page">
+  <div class="auth-box">
+    <div class="auth-logo">XplorX</div>
+    <div class="auth-sub"> XplorX Owner Portal</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+      <button class="auth-tab" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="login-form">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="login-email" placeholder="your@email.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="login-pass" placeholder="••••••••"/>
+      </div>
+      <button class="auth-btn" onclick="login()">Login</button>
+      <div class="auth-err" id="login-err"></div>
+    </div>
+
+    <!-- SIGNUP -->
+    <div id="signup-form" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" type="text" id="signup-name" placeholder="Your name"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="signup-email" placeholder="your@email.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="signup-pass" placeholder="Min 6 characters"/>
+      </div>
+      <button class="auth-btn" onclick="signup()">Create Account</button>
+      <div class="auth-err" id="signup-err"></div>
+      <div class="auth-suc" id="signup-suc"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <nav class="dash-nav">
+    <div class="dash-logo">XplorX Admin</div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="dash-user" id="dash-email"></div>
+      <button class="dash-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="dash-body">
+    <div class="dash-title">Welcome Back</div>
+    <div class="dash-subtitle">Manage your listings and bookings</div>
+
+    <div class="dash-tabs">
+      <button class="dash-tab active" onclick="switchDashTab('add')">+ Add Listing</button>
+      <button class="dash-tab" onclick="switchDashTab('listings')">My Listings</button>
+      <button class="dash-tab" onclick="switchDashTab('bookings')">Bookings</button>
+    </div>
+
+    <!-- ADD LISTING -->
+    <div class="dash-section active" id="tab-add">
+      <div class="form-card">
+        <div class="form-card-title">Add New Listing</div>
+        <div class="form-grid">
+          <div class="form-group-d">
+            <label class="label-d">Name *</label>
+            <input class="input-d" type="text" id="f-name" placeholder="Cafe / Restaurant name"/>
+          </div>
+          <div class="form-group-d">
+            <label class="label-d">Category *</label>
+            <select class="input-d" id="f-cat">
+              <option value="">Select category</option>
+              <option value="cafe">Cafe</option>
+              <option value="restaurant">Restaurant</option>
+              <option value="travel">Travel / Trip</option>
+              <option value="adventure">Adventure</option>
+              <option value="date">Date Spot</option>
+            </select>
+          </div>
+          <div class="form-group-d">
+            <label class="label-d">Area / Location *</label>
+            <input class="input-d" type="text" id="f-area" placeholder="Koregaon Park, Baner..."/>
+          </div>
+          <div class="form-group-d">
+            <label class="label-d">Price</label>
+            <input class="input-d" type="text" id="f-price" placeholder="₹500 avg / From ₹2,500"/>
+          </div>
+          <div class="form-group-d">
+            <label class="label-d">Rating</label>
+            <input class="input-d" type="number" id="f-rating" placeholder="4.5" min="1" max="5" step="0.1"/>
+          </div>
+          <div class="form-group-d">
+            <label class="label-d">Timings</label>
+            <input class="input-d" type="text" id="f-timings" placeholder="9AM - 10PM"/>
+          </div>
+          <div class="form-group-d">
+            <label class="label-d">WhatsApp Number</label>
+            <input class="input-d" type="text" id="f-whatsapp" placeholder="9XXXXXXXXX"/>
+          </div>
+          <div class="form-group-d">
+            <label class="label-d">Photo URL</label>
+            <input class="input-d" type="text" id="f-img" placeholder="Google Maps photo URL" oninput="previewImg(this.value)"/>
+          </div>
+          <div class="form-group-d full">
+            <label class="label-d">Description</label>
+            <textarea class="input-d" id="f-desc" placeholder="Tell customers about your place..."></textarea>
+          </div>
+          <div class="form-group-d full">
+            <label class="label-d">Photo Preview</label>
+            <div class="img-preview" id="img-preview">
+              <img id="preview-img" src="" alt=""/>
+              <div class="img-placeholder" id="img-placeholder">
+                📷<br>Paste photo URL above<br>to preview
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="submit-btn" id="submit-btn" onclick="addListing()">Save Listing</button>
+        <div class="form-success" id="form-success">✅ Listing added successfully! Visible on XplorX now.</div>
+        <div class="form-error" id="form-error"></div>
+      </div>
+    </div>
+
+    <!-- MY LISTINGS -->
+    <div class="dash-section" id="tab-listings">
+      <div id="listings-container">
+        <div class="loading">Loading your listings...</div>
+      </div>
+    </div>
+
+    <!-- BOOKINGS -->
+    <div class="dash-section" id="tab-bookings">
+      <div id="bookings-container">
+        <div class="loading">Loading bookings...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── SUPABASE INIT ──
+const _supabase = supabase.createClient(
+  'https://ttbheiwtysickbyasulr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0YmhlaXd0eXNpY2tieWFzdWxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDAxMzMsImV4cCI6MjA5NDA3NjEzM30.4qdV5Pyl9EgTzYqJGL_xSRGg9_BSlO01rw_6lCzcLRs'
+);
+
+// ── CHECK SESSION ──
+_supabase.auth.onAuthStateChange((event, session) => {
+  if(session){
+    showDashboard(session.user);
+  } else {
+    showAuth();
+  }
+});
+
+// ── AUTH FUNCTIONS ──
+function switchTab(tab){
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('login-form').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('signup-form').style.display = tab==='signup' ? 'block' : 'none';
+}
+
+async function login(){
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const err   = document.getElementById('login-err');
+  err.style.display = 'none';
+
+  if(!email || !pass){ err.textContent='Please fill all fields'; err.style.display='block'; return; }
+
+  const {error} = await _supabase.auth.signInWithPassword({email, password:pass});
+  if(error){ err.textContent = error.message; err.style.display='block'; }
+}
+
+async function signup(){
+  const name  = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pass  = document.getElementById('signup-pass').value;
+  const err   = document.getElementById('signup-err');
+  const suc   = document.getElementById('signup-suc');
+  err.style.display='none'; suc.style.display='none';
+
+  if(!name||!email||!pass){ err.textContent='Please fill all fields'; err.style.display='block'; return; }
+  if(pass.length < 6){ err.textContent='Password must be 6+ characters'; err.style.display='block'; return; }
+
+  const {error} = await _supabase.auth.signUp({
+    email, password:pass,
+    options:{ data:{ full_name: name } }
+  });
+
+  if(error){ err.textContent=error.message; err.style.display='block'; }
+  else { suc.textContent='Account created! Check your email to verify.'; suc.style.display='block'; }
+}
+
+async function logout(){
+  await _supabase.auth.signOut();
+}
+
+// ── SHOW/HIDE ──
+function showDashboard(user){
+  document.getElementById('auth-page').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('dash-email').textContent = user.email;
+}
+
+function showAuth(){
+  document.getElementById('auth-page').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
+}
+
+// ── DASHBOARD TABS ──
+function switchDashTab(tab){
+  document.querySelectorAll('.dash-tab').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.dash-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='listings') loadListings();
+  if(tab==='bookings') loadBookings();
+}
+
+// ── IMAGE PREVIEW ──
+function previewImg(url){
+  const img = document.getElementById('preview-img');
+  const placeholder = document.getElementById('img-placeholder');
+  if(url){
+    img.src = url;
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+    img.onerror = ()=>{ img.style.display='none'; placeholder.style.display='block'; };
+  } else {
+    img.style.display='none';
+    placeholder.style.display='block';
+  }
+}
+
+// ── ADD LISTING ──
+async function addListing(){
+  const btn = document.getElementById('submit-btn');
+  const suc = document.getElementById('form-success');
+  const err = document.getElementById('form-error');
+  suc.style.display='none'; err.style.display='none';
+
+  const name = document.getElementById('f-name').value.trim();
+  const cat  = document.getElementById('f-cat').value;
+  const area = document.getElementById('f-area').value.trim();
+
+  if(!name||!cat||!area){
+    err.textContent='Please fill Name, Category and Area'; err.style.display='block'; return;
+  }
+
+  btn.disabled=true; btn.textContent='Saving...';
+
+  const {data:{user}} = await _supabase.auth.getUser();
+
+  const {error} = await _supabase.from('cafes').insert({
+    name,
+    category : cat,
+    area,
+    price    : document.getElementById('f-price').value.trim(),
+    rating   : parseFloat(document.getElementById('f-rating').value)||null,
+    timings  : document.getElementById('f-timings').value.trim(),
+    whatsapp : document.getElementById('f-whatsapp').value.trim(),
+    image_url: document.getElementById('f-img').value.trim(),
+    description: document.getElementById('f-desc').value.trim(),
+    owner_id : user.id,
+    owner_email: user.email,
+  });
+
+  btn.disabled=false; btn.textContent='Save Listing';
+
+  if(error){ err.textContent=error.message; err.style.display='block'; }
+  else {
+    suc.style.display='block';
+    // Clear form
+    ['f-name','f-cat','f-area','f-price','f-rating','f-timings','f-whatsapp','f-img','f-desc'].forEach(id=>{
+      document.getElementById(id).value='';
+    });
+    previewImg('');
+  }
+}
+
+// ── LOAD LISTINGS ──
+async function loadListings(){
+  const container = document.getElementById('listings-container');
+  container.innerHTML = '<div class="loading">Loading...</div>';
+
+  const {data:{user}} = await _supabase.auth.getUser();
+  const {data, error} = await _supabase.from('cafes').select('*').eq('owner_id', user.id).order('created_at',{ascending:false});
+
+  if(error){ container.innerHTML=`<div class="loading">Error: ${error.message}</div>`; return; }
+  if(!data||data.length===0){
+    container.innerHTML=`<div class="empty-state"><div class="empty-icon">🏪</div><div class="empty-text">No listings yet — add your first one!</div></div>`;
+    return;
+  }
+
+  container.innerHTML=`<div class="listings-grid">${data.map(d=>`
+    <div class="listing-card">
+      ${d.image_url
+        ? `<img class="listing-img" src="${d.image_url}" onerror="this.style.display='none'">`
+        : `<div class="listing-img-placeholder">No Photo</div>`}
+      <div class="listing-body">
+        <div class="listing-cat">${d.category||'—'}</div>
+        <div class="listing-name">${d.name}</div>
+        <div class="listing-area">📍 ${d.area||'—'} · ${d.price||'—'}</div>
+        <div class="listing-actions">
+          <button class="lbtn del" onclick="deleteListing('${d.id}')">Delete</button>
+        </div>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+// ── DELETE LISTING ──
+async function deleteListing(id){
+  if(!confirm('Delete this listing?')) return;
+  await _supabase.from('cafes').delete().eq('id',id);
+  loadListings();
+}
+
+// ── LOAD BOOKINGS ──
+async function loadBookings(){
+  const container = document.getElementById('bookings-container');
+  container.innerHTML = '<div class="loading">Loading bookings...</div>';
+
+  const {data:{user}} = await _supabase.auth.getUser();
+
+  // Get owner's cafe names first
+  const {data:cafes} = await _supabase.from('cafes').select('name').eq('owner_id',user.id);
+  if(!cafes||cafes.length===0){
+    container.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No bookings yet</div></div>';
+    return;
+  }
+
+  const cafeNames = cafes.map(c=>c.name);
+  const {data, error} = await _supabase.from('bookings').select('*').in('cafe_name', cafeNames).order('created_at',{ascending:false});
+
+  if(!data||data.length===0){
+    container.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No bookings yet</div></div>';
+    return;
+  }
+
+  container.innerHTML=`
+    <div style="overflow-x:auto">
+    <table class="booking-table">
+      <thead>
+        <tr>
+          <th>Cafe</th>
+          <th>Customer</th>
+          <th>Phone</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Guests</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(b=>`
+          <tr>
+            <td>${b.cafe_name||'—'}</td>
+            <td>${b.customer_name||'—'}</td>
+            <td>${b.customer_phone||'—'}</td>
+            <td>${b.date||'—'}</td>
+            <td>${b.time||'—'}</td>
+            <td>${b.guests||'—'}</td>
+            <td><span class="status-badge status-${b.status||'pending'}">${b.status||'pending'}</span></td>
+            <td>
+              ${b.status==='pending'
+                ? `<button class="confirm-btn" onclick="confirmBooking('${b.id}')">Confirm</button>`
+                : '—'}
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    </div>`;
+}
+
+// ── CONFIRM BOOKING ──
+async function confirmBooking(id){
+  await _supabase.from('bookings').update({status:'confirmed'}).eq('id',id);
+  loadBookings();
+}
+</script>
+</body>
+</html>
