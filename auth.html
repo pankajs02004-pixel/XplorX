@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xploura — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const _supabase = supabase.createClient(
+  'https://ttbheiwtysickbyasulr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0YmhlaXd0eXNpY2tieWFzdWxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDAxMzMsImV4cCI6MjA5NDA3NjEzM30.4qdV5Pyl9EgTzYqJGL_xSRGg9_BSlO01rw_6lCzcLRs'
+);
+</script>
+<style>
+:root{
+  --black:#000;--white:#fff;--off-white:#FAFAF8;
+  --saffron:#FF6B00;--saffronL:#FF8C35;--saffronD:#CC5500;
+  --g1:rgba(255,255,255,0.06);--g2:rgba(255,255,255,0.12);
+  --g3:rgba(255,255,255,0.25);--g4:rgba(255,255,255,0.55);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--black);
+  color:var(--white);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;
+  display:flex;
+  overflow:hidden;
+}
+
+/* CUSTOM CURSOR */
+#cursor{width:8px;height:8px;background:var(--saffron);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.15s}
+#cursor-ring{width:30px;height:30px;border:1px solid rgba(255,107,0,0.35);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%)}
+
+/* LEFT PANEL — Visual */
+.left-panel{
+  flex:0 0 48%;
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:36px 44px;
+}
+canvas#auth-canvas{
+  position:absolute;inset:0;width:100%;height:100%;
+}
+.left-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.8) 100%);
+}
+.left-logo{
+  position:relative;z-index:2;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:0.16em;
+  color:var(--white);text-decoration:none;
+}
+.left-content{
+  position:relative;z-index:2;
+}
+.left-tagline{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(48px,5.5vw,72px);
+  line-height:0.88;
+  letter-spacing:0.03em;
+  margin-bottom:18px;
+}
+.lt-solid{color:var(--white)}
+.lt-stroke{color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,0.22)}
+.lt-orange{color:var(--saffron)}
+.left-sub{
+  font-size:12px;letter-spacing:0.12em;text-transform:uppercase;
+  color:rgba(255,255,255,0.35);line-height:1.9;
+  max-width:280px;
+}
+.left-stats{
+  position:relative;z-index:2;
+  display:flex;gap:28px;
+}
+.lstat{
+  display:flex;flex-direction:column;gap:3px;
+}
+.lstat-n{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:28px;letter-spacing:0.06em;
+  color:var(--saffron);line-height:1;
+}
+.lstat-l{
+  font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
+  color:rgba(255,255,255,0.28);
+}
+
+/* RIGHT PANEL — Auth Form */
+.right-panel{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:40px 52px;
+  background:#000;
+  position:relative;
+  overflow-y:auto;
+}
+.right-panel::before{
+  content:'';
+  position:absolute;top:0;left:0;
+  width:1px;height:100%;
+  background:linear-gradient(to bottom,transparent,rgba(255,107,0,0.3) 30%,rgba(255,107,0,0.3) 70%,transparent);
+}
+
+.auth-box{
+  width:100%;max-width:400px;
+}
+
+/* Role Selector */
+.role-selector{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:10px;margin-bottom:28px;
+}
+.role-btn{
+  padding:14px 12px;
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px;
+  background:transparent;
+  color:rgba(255,255,255,0.45);
+  font-family:'DM Sans',sans-serif;
+  font-size:12px;letter-spacing:0.08em;text-transform:uppercase;
+  cursor:pointer;
+  transition:all 0.3s;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.role-btn:hover{border-color:rgba(255,107,0,0.4);color:rgba(255,255,255,0.7)}
+.role-btn.active{
+  border-color:var(--saffron);
+  background:rgba(255,107,0,0.08);
+  color:var(--white);
+}
+.role-icon{font-size:22px;line-height:1}
+.role-label{font-weight:500}
+.role-desc{font-size:10px;color:rgba(255,255,255,0.3);text-transform:none;letter-spacing:0.03em;margin-top:-2px}
+
+/* Tab toggle */
+.auth-tabs{
+  display:flex;gap:0;
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px;
+  overflow:hidden;
+  margin-bottom:26px;
+}
+.auth-tab{
+  flex:1;padding:11px;
+  background:transparent;
+  color:rgba(255,255,255,0.35);
+  font-family:'DM Sans',sans-serif;font-size:12px;
+  letter-spacing:0.1em;text-transform:uppercase;font-weight:500;
+  cursor:pointer;border:none;
+  transition:all 0.25s;
+}
+.auth-tab.active{
+  background:rgba(255,107,0,0.15);
+  color:var(--saffron);
+  font-weight:600;
+}
+.auth-tab:not(.active){
+  background:rgba(255,255,255,0.04);
+  color:rgba(255,255,255,0.5);
+}
+
+/* Form */
+.auth-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:38px;letter-spacing:0.06em;
+  margin-bottom:6px;color:var(--white);
+}
+.auth-sub{
+  font-size:12px;color:rgba(255,255,255,0.32);
+  letter-spacing:0.05em;margin-bottom:28px;line-height:1.7;
+}
+
+.field{margin-bottom:14px;position:relative}
+.field label{
+  display:block;
+  font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+  color:rgba(255,255,255,0.35);margin-bottom:6px;font-weight:500;
+}
+.field input{
+  width:100%;
+  padding:13px 16px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px;
+  color:var(--white);
+  font-family:'DM Sans',sans-serif;font-size:14px;
+  outline:none;
+  transition:border-color 0.25s,background 0.25s;
+}
+.field input:focus{
+  border-color:rgba(255,107,0,0.5);
+  background:rgba(255,107,0,0.04);
+}
+.field input::placeholder{color:rgba(255,255,255,0.2)}
+
+/* Google button */
+.btn-google{
+  width:100%;padding:13px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:8px;
+  color:var(--white);
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;
+  letter-spacing:0.04em;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:all 0.3s;
+  margin-bottom:14px;
+}
+.btn-google:hover{border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.07)}
+.google-icon{width:18px;height:18px;flex-shrink:0}
+
+.divider{
+  display:flex;align-items:center;gap:12px;
+  margin:18px 0;
+}
+.divider-line{flex:1;height:1px;background:rgba(255,255,255,0.08)}
+.divider-text{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.2)}
+
+/* Main CTA */
+.btn-submit{
+  width:100%;padding:15px;
+  background:var(--saffron);
+  border:none;border-radius:8px;
+  color:var(--white);
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+  letter-spacing:0.12em;text-transform:uppercase;
+  cursor:pointer;
+  transition:all 0.35s;
+  margin-top:4px;
+  position:relative;overflow:hidden;
+}
+.btn-submit::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);
+  transform:translateX(-100%);transition:transform 0.5s;
+}
+.btn-submit:hover{background:var(--saffronL);transform:translateY(-1px)}
+.btn-submit:hover::after{transform:translateX(100%)}
+.btn-submit:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+
+/* Error / Success */
+.msg-box{
+  padding:12px 16px;border-radius:8px;
+  font-size:13px;line-height:1.5;
+  margin-bottom:14px;display:none;
+}
+.msg-box.error{background:rgba(255,60,60,0.1);border:1px solid rgba(255,60,60,0.25);color:#ff6b6b}
+.msg-box.success{background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);color:#4ade80}
+.msg-box.show{display:block}
+
+.auth-footer{
+  margin-top:22px;text-align:center;
+  font-size:12px;color:rgba(255,255,255,0.25);line-height:1.7;
+}
+.auth-footer a{color:var(--saffron);text-decoration:none}
+.auth-footer a:hover{text-decoration:underline}
+
+/* Password toggle */
+.pw-toggle{
+  position:absolute;right:14px;bottom:14px;
+  background:none;border:none;cursor:pointer;
+  color:rgba(255,255,255,0.25);padding:0;
+  transition:color 0.2s;
+}
+.pw-toggle:hover{color:rgba(255,255,255,0.5)}
+.pw-toggle svg{width:16px;height:16px;stroke:currentColor;fill:none}
+
+/* Owner extra fields */
+.owner-fields{
+  overflow:hidden;
+  max-height:0;
+  transition:max-height 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.owner-fields.show{max-height:200px}
+
+/* Loading spinner inside button */
+.spinner{
+  display:inline-block;width:14px;height:14px;
+  border:2px solid rgba(255,255,255,0.3);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Back to home */
+.back-home{
+  position:fixed;top:20px;right:28px;
+  font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+  color:rgba(255,255,255,0.3);text-decoration:none;
+  display:flex;align-items:center;gap:6px;
+  transition:color 0.2s;z-index:10;
+}
+.back-home:hover{color:var(--saffron)}
+
+@media(max-width:768px){
+  .left-panel{display:none}
+  .right-panel{padding:32px 24px}
+  body{overflow-y:auto}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<a href="XploreX.html" class="back-home">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+  Back to Home
+</a>
+
+<!-- LEFT VISUAL PANEL -->
+<div class="left-panel">
+  <canvas id="auth-canvas"></canvas>
+  <div class="left-overlay"></div>
+
+  <a href="XploreX.html" class="left-logo">Xploura</a>
+
+  <div class="left-content">
+    <div class="left-tagline">
+      <span class="lt-solid">Your</span><br>
+      <span class="lt-stroke">Next</span><br>
+      <span class="lt-orange">World</span><br>
+      <span class="lt-solid">Awaits</span>
+    </div>
+    <p class="left-sub">Cafes · Dates · Adventure<br>Restaurants · Trips</p>
+  </div>
+
+  <div class="left-stats">
+    <div class="lstat"><div class="lstat-n">240+</div><div class="lstat-l">Destinations</div></div>
+    <div class="lstat"><div class="lstat-n">4.9</div><div class="lstat-l">Avg Rating</div></div>
+    <div class="lstat"><div class="lstat-n">92K</div><div class="lstat-l">Explorers</div></div>
+  </div>
+</div>
+
+<!-- RIGHT AUTH PANEL -->
+<div class="right-panel">
+  <div class="auth-box">
+
+    <!-- ROLE SELECTOR -->
+   
+
+    <!-- TABS -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-signin" onclick="switchTab('signin')">Sign In</button>
+      <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Get Started</button>
+    </div>
+
+    <!-- TITLE -->
+    <div class="auth-title" id="auth-title">Welcome Back</div>
+    <div class="auth-sub" id="auth-sub">Sign in to continue your journey</div>
+
+    <!-- MESSAGE BOX -->
+    <div class="msg-box" id="msg-box"></div>
+
+    <!-- GOOGLE BUTTON -->
+   <button class="btn-google" onclick="signInGoogle()" style="display:none">
+      <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <div class="divider" style="display:none">
+      <div class="divider-line"></div>
+      <div class="divider-text">or</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- FORM -->
+    <form onsubmit="handleSubmit(event)">
+
+      <!-- Owner extra: Business name (signup only) -->
+      <div class="owner-fields" id="owner-fields">
+        <div class="field">
+          <label>Business Name</label>
+          <input type="text" id="business-name" placeholder="Cafe Pagdandi, Dario's..."/>
+        </div>
+        <div class="field">
+          <label>WhatsApp Number</label>
+          <input type="tel" id="business-wa" placeholder="+91 98765 43210"/>
+        </div>
+      </div>
+
+      <!-- Name field (signup only) -->
+      <div class="field" id="field-name" style="display:none">
+        <label>Full Name</label>
+        <input type="text" id="input-name" placeholder="Your name"/>
+      </div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" id="input-email" placeholder="you@email.com" required/>
+      </div>
+
+      <div class="field" style="position:relative">
+        <label>Password</label>
+        <input type="password" id="input-password" placeholder="Min. 6 characters" required/>
+        <button type="button" class="pw-toggle" onclick="togglePw()">
+          <svg id="pw-eye" viewBox="0 0 24 24" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submit-btn">Sign In</button>
+    </form>
+
+    <div class="auth-footer" id="auth-footer">
+      Don't have an account? <a href="#" onclick="switchTab('signup');return false">Get Started free →</a>
+    </div>
+
+    <div class="auth-footer" style="margin-top:10px">
+      <a href="XploreX.html">← Back to Xploura</a>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ── CURSOR ──
+const cur=document.getElementById('cursor'),curR=document.getElementById('cursor-ring');
+let cx=0,cy=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{cx=e.clientX;cy=e.clientY});
+(function ac(){cur.style.left=cx+'px';cur.style.top=cy+'px';rx+=(cx-rx)*0.13;ry+=(cy-ry)*0.13;curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(ac)})();
+
+// ── LEFT PANEL — PORTAL CANVAS ──
+(function(){
+  const canvas = document.getElementById('auth-canvas');
+  if(!canvas) return;
+  const W=()=>canvas.offsetWidth, H=()=>canvas.offsetHeight;
+  const renderer = new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(W(),H());
+  renderer.setClearColor(0x000000,1);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(70,W()/H(),0.1,1000);
+  camera.position.z=100;
+
+  // Tunnel particles
+  const n=5000, geo=new THREE.BufferGeometry();
+  const pos=new Float32Array(n*3), col=new Float32Array(n*3);
+  for(let i=0;i<n;i++){
+    const t=(i/n)*Math.PI*2*15;
+    const r=14+Math.random()*6;
+    const d=(Math.random()-0.5)*250;
+    pos[i*3]=Math.cos(t)*r+(Math.random()-.5)*3;
+    pos[i*3+1]=Math.sin(t)*r+(Math.random()-.5)*3;
+    pos[i*3+2]=d;
+    if(Math.random()>.65){col[i*3]=1;col[i*3+1]=0.42;col[i*3+2]=0;}
+    else{const b=.25+((d+125)/250)*.7;col[i*3]=b;col[i*3+1]=b;col[i*3+2]=b;}
+  }
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+  const mat=new THREE.PointsMaterial({size:.5,vertexColors:true,transparent:true,opacity:.8});
+  const tunnel=new THREE.Points(geo,mat);
+  scene.add(tunnel);
+
+  // Portal rings
+  [5,9,13,17,21,26,30].forEach((r,i)=>{
+    const sg=new THREE.BufferGeometry(), sp=new Float32Array(128*3);
+    for(let s=0;s<128;s++){const a=s/128*Math.PI*2;sp[s*3]=Math.cos(a)*r;sp[s*3+1]=Math.sin(a)*r;sp[s*3+2]=0;}
+    sg.setAttribute('position',new THREE.BufferAttribute(sp,3));
+    const sm=new THREE.PointsMaterial({size:i<2?.9:.5,color:i%2===0?0xFF6B00:0xffffff,transparent:true,opacity:1-i*.12});
+    const ring=new THREE.Points(sg,sm);
+    ring.userData={spd:.007+i*.003,dir:i%2?1:-1};
+    scene.add(ring);
+  });
+
+  let mx=0,my=0,frame=0;
+  document.addEventListener('mousemove',e=>{mx=(e.clientX/window.innerWidth-.5)*2;my=(e.clientY/window.innerHeight-.5)*2;});
+  window.addEventListener('resize',()=>{renderer.setSize(W(),H());camera.aspect=W()/H();camera.updateProjectionMatrix();});
+
+  (function animate(){
+    requestAnimationFrame(animate);frame++;
+    camera.position.x+=(mx*8-camera.position.x)*.04;
+    camera.position.y+=(-my*5-camera.position.y)*.04;
+    camera.lookAt(0,0,-50);
+    tunnel.rotation.z=frame*.001;
+    const pp=tunnel.geometry.attributes.position.array;
+    for(let i=0;i<n;i++){pp[i*3+2]+=.25;if(pp[i*3+2]>50)pp[i*3+2]=-125;}
+    tunnel.geometry.attributes.position.needsUpdate=true;
+    mat.opacity=.65+Math.sin(frame*.02)*.15;
+    scene.children.forEach(obj=>{if(obj.userData.spd){obj.rotation.z+=obj.userData.spd*obj.userData.dir;const p=1+Math.sin(frame*.03)*0.06;obj.scale.set(p,p,1);}});
+    renderer.render(scene,camera);
+  })();
+})();
+
+// ── STATE ──
+let currentRole = 'customer'; // 'customer' | 'owner'
+let currentTab  = 'signin';   // 'signin' | 'signup'
+
+function selectRole(role){
+  currentRole = role;
+  document.getElementById('role-customer').classList.toggle('active', role==='customer');
+  document.getElementById('role-owner').classList.toggle('active', role==='owner');
+  updateUI();
+}
+
+function switchTab(tab){
+  currentTab = tab;
+  document.getElementById('tab-signin').classList.toggle('active', tab==='signin');
+  document.getElementById('tab-signup').classList.toggle('active', tab==='signup');
+  updateUI();
+  hideMsg();
+}
+
+function updateUI(){
+  const isSignup = currentTab === 'signup';
+  const isOwner  = currentRole === 'owner';
+
+  // Title
+  const titles = {
+    signin:  { customer:'Welcome Back',        owner:'Owner Sign In'       },
+    signup:  { customer:'Start Exploring',     owner:'List Your Business'  },
+  };
+  const subs = {
+    signin:  { customer:'Sign in to continue your journey', owner:'Access your listing dashboard' },
+    signup:  { customer:'Create your free Xploura account', owner:'Join as a partner — it\'s free' },
+  };
+  document.getElementById('auth-title').textContent = titles[currentTab][currentRole];
+  document.getElementById('auth-sub').textContent   = subs[currentTab][currentRole];
+
+  // Name field
+  document.getElementById('field-name').style.display = isSignup ? 'block' : 'none';
+
+  // Owner fields (business name + WA)
+  document.getElementById('owner-fields').classList.toggle('show', isSignup && isOwner);
+
+  // Submit button
+  const btnLabels = {
+    signin: { customer:'Sign In',      owner:'Sign In'            },
+    signup: { customer:'Create Account', owner:'Register Business' },
+  };
+  document.getElementById('submit-btn').textContent = btnLabels[currentTab][currentRole];
+
+  // Footer link
+  if(isSignup){
+    document.getElementById('auth-footer').innerHTML = 'Already have an account? <a href="#" onclick="switchTab(\'signin\');return false">Sign In →</a>';
+  } else {
+    document.getElementById('auth-footer').innerHTML = 'Don\'t have an account? <a href="#" onclick="switchTab(\'signup\');return false">Get Started free →</a>';
+  }
+}
+
+// ── PASSWORD TOGGLE ──
+let pwVisible = false;
+function togglePw(){
+  pwVisible = !pwVisible;
+  document.getElementById('input-password').type = pwVisible ? 'text' : 'password';
+}
+
+// ── MESSAGES ──
+function showMsg(text, type='error'){
+  const b = document.getElementById('msg-box');
+  b.textContent = text;
+  b.className = `msg-box ${type} show`;
+}
+function hideMsg(){
+  document.getElementById('msg-box').className = 'msg-box';
+}
+
+// ── GOOGLE SIGN IN ──
+async function signInGoogle(){
+  hideMsg();
+  const {error} = await _supabase.auth.signInWithOAuth({
+    provider:'google',
+    options:{redirectTo:window.location.origin+'/xplorex.html'}
+  });
+  if(error) showMsg(error.message);
+}
+
+// ── EMAIL AUTH ──
+async function handleSubmit(e){
+  e.preventDefault();
+  hideMsg();
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>' + (currentTab==='signin'?'Signing In...':'Creating Account...');
+
+  const email    = document.getElementById('input-email').value.trim();
+  const password = document.getElementById('input-password').value;
+  const name     = document.getElementById('input-name').value.trim();
+  const bizName  = document.getElementById('business-name').value.trim();
+  const bizWa    = document.getElementById('business-wa').value.trim();
+
+  if(currentTab === 'signup'){
+    // SIGN UP
+    const {data, error} = await _supabase.auth.signUp({
+      email, password,
+      options:{
+        data:{
+          full_name: name,
+          role: currentRole,
+          business_name: bizName || null,
+          whatsapp: bizWa || null,
+        }
+      }
+    });
+
+    if(error){
+      showMsg(error.message);
+    } else if(data?.user?.identities?.length === 0){
+      showMsg('This email is already registered. Please sign in instead.', 'error');
+    } else {
+      // If owner, also save to a profiles/owners table
+      if(currentRole === 'owner' && data.user){
+        await _supabase.from('cafe_owners').insert({
+          user_id:    data.user.id,
+          email:      email,
+          name:       name,
+          business:   bizName,
+          whatsapp:   bizWa,
+          created_at: new Date().toISOString(),
+        }).select();
+      }
+      showMsg('✅ Check your email to confirm your account! Then come back to sign in.', 'success');
+    }
+  } else {
+    // SIGN IN
+    const {data, error} = await _supabase.auth.signInWithPassword({email, password});
+
+    if(error){
+      showMsg(error.message);
+    } else {
+      // Redirect based on role stored in user metadata
+      const role = data.user?.user_metadata?.role || 'customer';
+      showMsg('✅ Welcome back! Redirecting...', 'success');
+      setTimeout(()=>{
+        if(role === 'owner'){
+          window.location.href = 'admin.html';
+        } else {
+          window.location.href = 'XploreX.html';
+        }
+      }, 1200);
+    }
+  }
+
+  btn.disabled = false;
+  btn.textContent = document.getElementById('submit-btn').getAttribute('data-label') ||
+    (currentTab==='signin' ? 'Sign In' : 'Create Account');
+  updateUI();
+    (currentTab==='signin' ? 'Sign In' : 'Create Account');
+  updateUI();
+}
+
+(async function checkSession(){
+  const {data:{session}} = await _supabase.auth.getSession();
+  if(session){
+    // Sirf tab redirect karo jab ?tab=signup nahi hai URL mein
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if(tab !== 'signup'){
+      const role = session.user?.user_metadata?.role || 'customer';
+      window.location.href = role === 'owner' ? 'admin.html' : 'XploreX.html';
+    }
+  }
+})();
+// ── LISTEN FOR AUTH CHANGES ──
+_supabase.auth.onAuthStateChange((event, session)=>{
+  if(event === 'SIGNED_IN' && session){
+    // Only redirect after actual sign in, not on page load
+    const params = new URLSearchParams(window.location.search);
+    if(params.get('tab') !== 'signup'){
+      const role = session.user?.user_metadata?.role || 'customer';
+      window.location.href = role === 'owner' ? 'admin.html' : 'XploreX.html';
+    }
+  }
+});
+
+// init UI
+updateUI();
+</script>
+</body>
+</html>
