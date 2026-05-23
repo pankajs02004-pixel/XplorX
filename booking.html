@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xplorura — Book Your Experience</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --black:#000;--white:#fff;--off-white:#FAFAF8;
+  --saffron:#FF6B00;--saffronL:#FF8C35;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--off-white);color:var(--black);min-height:100vh}
+
+/* NAV */
+nav{background:#000;padding:18px 32px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.14em;color:var(--saffron);text-decoration:none}
+.nav-back{font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);text-decoration:none;border:0.5px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:20px;transition:all 0.3s}
+.nav-back:hover{color:var(--saffron);border-color:var(--saffron)}
+
+/* HERO */
+.book-hero{position:relative;height:320px;overflow:hidden}
+.book-hero-img{width:100%;height:100%;object-fit:cover}
+.book-hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.2),rgba(0,0,0,0.7))}
+.book-hero-content{position:absolute;bottom:0;left:0;right:0;padding:32px}
+.book-cat{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--saffron);margin-bottom:8px;font-weight:500}
+.book-name{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:0.04em;color:#fff;line-height:1}
+.book-area{font-size:14px;color:rgba(255,255,255,0.6);margin-top:6px}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:#000}
+.stat-box{padding:20px 24px;border-right:0.5px solid rgba(255,255,255,0.06)}
+.stat-box:last-child{border-right:none}
+.stat-label{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:6px}
+.stat-val{font-size:18px;font-weight:600;color:#fff}
+.stat-icon{font-size:16px;margin-right:4px}
+
+/* BODY */
+.book-body{max-width:800px;margin:0 auto;padding:40px 24px}
+
+/* DESCRIPTION */
+.desc-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;padding:24px;margin-bottom:24px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.desc-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.06em;margin-bottom:10px;color:var(--black)}
+.desc-text{font-size:14px;color:rgba(0,0,0,0.5);line-height:1.8}
+
+/* BOOKING TABS */
+.btabs{display:flex;gap:10px;margin-bottom:24px}
+.btab{flex:1;padding:16px;border-radius:12px;border:1.5px solid rgba(0,0,0,0.1);background:#fff;cursor:pointer;transition:all 0.3s;text-align:center}
+.btab.active{border-color:var(--saffron);background:rgba(255,107,0,0.04)}
+.btab-icon{font-size:24px;margin-bottom:6px}
+.btab-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.06em;color:var(--black)}
+.btab-sub{font-size:11px;color:rgba(0,0,0,0.35);margin-top:2px}
+
+/* FORM */
+.form-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:16px;padding:28px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.form-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.06em;margin-bottom:20px;color:var(--black)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.finput{width:100%;padding:13px 16px;border:1px solid rgba(0,0,0,0.12);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--black);outline:none;background:#fff;transition:border-color 0.2s}
+.finput:focus{border-color:var(--saffron)}
+.finput::placeholder{color:rgba(0,0,0,0.25)}
+.finput.full{grid-column:1/-1}
+.fsubmit{width:100%;padding:15px;background:var(--saffron);color:#fff;border:none;border-radius:10px;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;transition:all 0.3s;margin-top:6px}
+.fsubmit:hover{background:var(--saffronL)}
+.fsubmit:disabled{opacity:0.5;cursor:not-allowed}
+
+/* DATE BOX */
+.datebox-items{margin-bottom:20px}
+.datebox-title{font-size:13px;font-weight:600;color:var(--black);margin-bottom:12px;letter-spacing:0.05em}
+.datebox-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.dbitem{padding:14px 10px;border:1px solid rgba(0,0,0,0.08);border-radius:10px;text-align:center;background:#fafafa}
+.dbitem-icon{font-size:22px;margin-bottom:4px}
+.dbitem-name{font-size:11px;color:rgba(0,0,0,0.5)}
+
+/* SUCCESS */
+.success-page{display:none;text-align:center;padding:60px 24px}
+.success-icon{font-size:64px;margin-bottom:20px}
+.success-title{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:0.04em;color:var(--black);margin-bottom:10px}
+.success-sub{font-size:15px;color:rgba(0,0,0,0.45);line-height:1.7;margin-bottom:28px}
+.success-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.sbtn{padding:13px 28px;border-radius:10px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;transition:all 0.3s;text-decoration:none;display:inline-block}
+.sbtn-primary{background:var(--saffron);color:#fff;border:none}
+.sbtn-ghost{background:transparent;color:var(--black);border:1.5px solid rgba(0,0,0,0.15)}
+
+@media(max-width:600px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .form-grid{grid-template-columns:1fr}
+  .btabs{flex-direction:column}
+  .datebox-grid{grid-template-columns:repeat(2,1fr)}
+  .book-name{font-size:38px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="XploreX.html" class="nav-logo">Xploura</a>
+  <a href="XploreX.html" class="nav-back">← Back</a>
+</nav>
+
+<!-- HERO -->
+<div class="book-hero">
+  <img class="book-hero-img" id="hero-img" src="" onerror="this.style.display='none'"/>
+  <div class="book-hero-overlay"></div>
+  <div class="book-hero-content">
+    <div class="book-cat" id="hero-cat"></div>
+    <div class="book-name" id="hero-name">Loading...</div>
+    <div class="book-area" id="hero-area"></div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-box"><div class="stat-label">⭐ Rating</div><div class="stat-val" id="s-rating">—</div></div>
+  <div class="stat-box"><div class="stat-label">💰 Price</div><div class="stat-val" id="s-price">—</div></div>
+  <div class="stat-box"><div class="stat-label">🕐 Timings</div><div class="stat-val" id="s-timings">—</div></div>
+  <div class="stat-box"><div class="stat-label">👥 Crowd</div><div class="stat-val" id="s-crowd">—</div></div>
+</div>
+
+<!-- BODY -->
+<div class="book-body">
+
+  <!-- DESC -->
+  <div class="desc-card">
+    <div class="desc-title">About This Place</div>
+    <div class="desc-text" id="desc-text">Loading description...</div>
+  </div>
+
+  <!-- BOOKING TABS -->
+  <div class="btabs">
+    <div class="btab active" onclick="switchType('book',this)">
+      <div class="btab-icon">📅</div>
+      <div class="btab-title">Book Table</div>
+      <div class="btab-sub">Reserve your spot</div>
+    </div>
+    <div class="btab" onclick="switchType('date',this)">
+      <div class="btab-icon">💑</div>
+      <div class="btab-title">Order Date Box</div>
+      <div class="btab-sub">Premium date experience</div>
+    </div>
+    <div class="btab" onclick="openWhatsApp()">
+      <div class="btab-icon">💬</div>
+      <div class="btab-title">WhatsApp</div>
+      <div class="btab-sub">Chat directly</div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-card" id="form-section">
+    <div class="form-title" id="form-title">Book Your Table</div>
+
+    <!-- Date Box Items -->
+    <div class="datebox-items" id="datebox-items" style="display:none">
+      <div class="datebox-title">What's included in your Date Box 🎁</div>
+      <div class="datebox-grid">
+        <div class="dbitem"><div class="dbitem-icon">🕯️</div><div class="dbitem-name">Scented Candle</div></div>
+        <div class="dbitem"><div class="dbitem-icon">🍫</div><div class="dbitem-name">Premium Chocolates</div></div>
+        <div class="dbitem"><div class="dbitem-icon">💌</div><div class="dbitem-name">Handwritten Note</div></div>
+        <div class="dbitem"><div class="dbitem-icon">🌸</div><div class="dbitem-name">Mini Flowers</div></div>
+        <div class="dbitem"><div class="dbitem-icon">🎵</div><div class="dbitem-name">Spotify QR Playlist</div></div>
+        <div class="dbitem"><div class="dbitem-icon">🎴</div><div class="dbitem-name">Couple Game Cards</div></div>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <input class="finput" id="f-name" placeholder="Your Full Name *"/>
+      <input class="finput" id="f-phone" placeholder="Phone Number *" type="tel"/>
+      <input class="finput" id="f-date" type="date" placeholder="Date"/>
+      <input class="finput" id="f-time" placeholder="Preferred Time (e.g. 7 PM)"/>
+      <input class="finput" id="f-guests" placeholder="No. of Guests" type="number" min="1"/>
+      <input class="finput" id="f-note" placeholder="Special Note (optional)"/>
+    </div>
+    <button class="fsubmit" id="fsubmit" onclick="submitBooking()">📅 Confirm Booking</button>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-page" id="success-page">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Booking Confirmed!</div>
+    <div class="success-sub" id="success-msg">Your booking has been received.<br>The venue will contact you shortly.</div>
+    <div class="success-btns">
+      <a href="XploreX.html" class="sbtn sbtn-primary">Explore More</a>
+      <a href="#" class="sbtn sbtn-ghost" id="wa-confirm">WhatsApp Venue</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const _supabase = supabase.createClient(
+  'https://ttbheiwtysickbyasulr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0YmhlaXd0eXNpY2tieWFzdWxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDAxMzMsImV4cCI6MjA5NDA3NjEzM30.4qdV5Pyl9EgTzYqJGL_xSRGg9_BSlO01rw_6lCzcLRs'
+);
+
+// Load data from URL params
+const params = new URLSearchParams(window.location.search);
+let placeData = {};
+try{ placeData = JSON.parse(decodeURIComponent(params.get('data')||'{}')); }catch(e){}
+
+// Fill page
+const img = placeData.image_url || placeData.img || '';
+document.getElementById('hero-img').src = img;
+document.getElementById('hero-cat').textContent = placeData.category || placeData.tag || '';
+document.getElementById('hero-name').textContent = placeData.name || 'Xploura';
+document.getElementById('hero-area').textContent = '📍 ' + (placeData.area || '');
+document.getElementById('s-rating').textContent = (placeData.rating||'—') + ' / 5';
+document.getElementById('s-price').textContent = placeData.price || '—';
+document.getElementById('s-timings').textContent = placeData.timings || '—';
+const crowd = placeData.rating >= 4.8 ? '🔴 High' : placeData.rating >= 4.5 ? '🟡 Medium' : '🟢 Low';
+document.getElementById('s-crowd').textContent = crowd;
+document.getElementById('desc-text').textContent = placeData.description || 'A premium experience awaits you in Pune.';
+
+let bookType = 'book';
+
+// Date Box sirf date category ke liye
+if(placeData.category !== 'date'){
+  document.querySelectorAll('.btab')[1].style.display = 'none';
+}
+
+function switchType(type, el){
+  bookType = type;
+  document.querySelectorAll('.btab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const isDate = type === 'date';
+  document.getElementById('form-title').textContent = isDate ? 'Order Your Date Box 💑' : 'Book Your Table 📅';
+  document.getElementById('datebox-items').style.display = isDate ? 'block' : 'none';
+  document.getElementById('fsubmit').textContent = isDate ? '💑 Order Date Box' : '📅 Confirm Booking';
+}
+
+function openWhatsApp(){
+  const num = placeData.whatsapp || '';
+  if(!num){ alert('WhatsApp not available for this venue'); return; }
+  const msg = `Hi! I found ${placeData.name} on Xploura. I'd like to know more.`;
+  window.open(`https://wa.me/91${num}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+async function submitBooking(){
+  const name   = document.getElementById('f-name').value.trim();
+  const phone  = document.getElementById('f-phone').value.trim();
+  const date   = document.getElementById('f-date').value;
+  const time   = document.getElementById('f-time').value.trim();
+  const guests = document.getElementById('f-guests').value;
+  const note   = document.getElementById('f-note').value.trim();
+
+  if(!name||!phone){ alert('Please enter your name and phone number'); return; }
+
+  const btn = document.getElementById('fsubmit');
+  btn.disabled=true; btn.textContent='Saving...';
+
+  const {error} = await _supabase.from('bookings').insert({
+    cafe_name     : placeData.name,
+    customer_name : name,
+    customer_phone: phone,
+    date, time,
+    guests        : parseInt(guests)||1,
+    status        : 'pending',
+    note,
+    type          : bookType,
+  });
+
+  btn.disabled=false;
+  btn.textContent = bookType==='date'?'💑 Order Date Box':'📅 Confirm Booking';
+
+  if(!error){
+    document.getElementById('form-section').style.display='none';
+    document.getElementById('success-page').style.display='block';
+
+    const msg = bookType==='date'
+      ? `🎁 New Date Box Order!\nVenue: ${placeData.name}\nFrom: ${name}\nPhone: ${phone}\nDate: ${date} ${time}\nNote: ${note||'—'}`
+      : `📅 New Booking!\nVenue: ${placeData.name}\nFrom: ${name}\nPhone: ${phone}\nDate: ${date} ${time}\nGuests: ${guests||1}\nNote: ${note||'—'}`;
+
+    if(placeData.whatsapp){
+      document.getElementById('wa-confirm').href =
+        `https://wa.me/91${placeData.whatsapp}?text=${encodeURIComponent(msg)}`;
+      window.open(`https://wa.me/91${placeData.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+  } else {
+    alert('Error: ' + error.message);
+  }
+}
+</script>
+</body>
+</html>
